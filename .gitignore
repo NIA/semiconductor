@@ -1,0 +1,6 @@
+*~
+*.sw*
+bin/
+build/
+Makefile
+
