@@ -18,14 +18,23 @@ class Model
 {
 private:
     DataSeries data;
+
+    // Parameters
+
     double Eg; // erg
-    double Ed; // erg
-    double Ea; // erg
-    double density_donor; // cm^-3
-    double density_acceptor; // cm^-3
-    double T; // K
     double mc; // gramm
     double mv; // gramm
+    double permittivity; // <no unit>
+
+    double T; // K
+
+    double Ea; // erg
+    double Ed; // erg
+    double density_acceptor; // cm^-3
+    double density_donor; // cm^-3
+
+    void set_silicon();
+
 
     void compute_fermi_level();
     double fermi_level; // erg
