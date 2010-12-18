@@ -35,22 +35,23 @@ private:
 
     void set_silicon();
 
+    double neutrality_function(double fermi_level);
 
-    void compute_fermi_level();
-    double fermi_level; // erg
+    void compute_neutral_fermi_level();
+    double neutral_fermi_level; // erg
 
     // fermi distribution
-    double fermi(double energy); // <no unit>
+    double fermi(double energy, double fermi_level); // <no unit>
 
     void compute_eff_dencities();
     double eff_density_c; // cm^-3
     double eff_density_v; // cm^-3
 
-    double density_n(double energy);
-    double density_p(double energy);
+    double density_n(double energy, double fermi_level);
+    double density_p(double energy, double fermi_level);
 
-    double density_donor_p(double energy);
-    double density_acceptor_n(double energy);
+    double density_donor_p(double energy, double fermi_level);
+    double density_acceptor_n(double energy, double fermi_level);
 
 public:
     Model();
