@@ -21,4 +21,9 @@ private:
     Ui::Widget *ui;
     Model * model;
     QwtPlotCurve * curve;
+
+    void copySiliconFromModel();
+    void copyAdmixturesDefaultFromModel();
+    void copyOthersDefaultFromModel();
+
 };

@@ -20,3 +20,13 @@ inline double erg_to_electron_volt(double erg)
 }
 
 static const double ELECTRON_MASS = 9.1093e-28; // mass of electron, gramm
+
+inline int double_exponent(double value)
+{
+    return (int) floor( log10(value) );
+}
+
+inline double double_mantissa(double value)
+{
+    return value/pow(10, double_exponent(value));
+}
