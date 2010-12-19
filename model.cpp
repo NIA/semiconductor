@@ -17,16 +17,14 @@ namespace
     const double default_T = 300; // K
     const double default_density_admixture = 1e17; // cm^-3
     const double default_E_admixture = electron_volt_to_erg(0.045); // erg
+    const double default_surface_potential = 0.1; // V
 }
 
 Model::Model()
-    : T(default_T),
-      Ea(default_E_admixture),
-      Ed(default_E_admixture),
-      density_acceptor(default_density_admixture),
-      density_donor(default_density_admixture)
 {
     set_silicon();
+    set_admixtures_default();
+    set_others_default();
 }
 
 void Model::set_silicon()
@@ -35,6 +33,20 @@ void Model::set_silicon()
     mc = silicon_mc;
     mv = silicon_mv;
     permittivity = silicon_permittivity;
+}
+
+void Model::set_admixtures_default()
+{
+    Ea = default_E_admixture;
+    Ed = default_E_admixture;
+    density_acceptor = default_density_admixture;
+    density_donor = default_density_admixture;
+}
+
+void Model::set_others_default()
+{
+    T = default_T;
+    surface_potential = default_surface_potential;
 }
 
 void Model::fill_data()
