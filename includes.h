@@ -18,3 +18,5 @@ inline double erg_to_electron_volt(double erg)
 {
     return erg/ELECTRON_VOLT_IN_ERGS;
 }
+
+static const double ELECTRON_MASS = 9.1093e-28; // mass of electron, gramm

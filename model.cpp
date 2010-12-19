@@ -4,14 +4,13 @@
 namespace
 {
     // Fundametnal
-    const double m0 = 9.1093e-28; // gramm
     const double k = 1.380662e-16; // erg * K
     const double default_eff_density = 2.51e+19; // cm^-3
 
     // Silicon:
     const double silicon_Eg = electron_volt_to_erg(1.12); // erg
-    const double silicon_mc = 0.36 * m0; // gramm
-    const double silicon_mv = 0.81 * m0; // gramm
+    const double silicon_mc = 0.36 * ELECTRON_MASS; // gramm
+    const double silicon_mv = 0.81 * ELECTRON_MASS; // gramm
     const double silicon_permittivity = 12; // <no unit>
 
     // Default:
@@ -58,7 +57,7 @@ void Model::fill_data()
 
 double eff_density(double m, double T)
 {
-    return default_eff_density * pow((m/m0), (3./2.)) * pow((T/300), (3./2.));
+    return default_eff_density * pow((m/ELECTRON_MASS), (3./2.)) * pow((T/300), (3./2.));
 }
 
 void Model::compute_eff_dencities()
