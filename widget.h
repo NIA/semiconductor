@@ -26,4 +26,9 @@ private:
     void copyAdmixturesDefaultFromModel();
     void copyOthersDefaultFromModel();
 
+
+private slots:
+    void on_othersDefaultButton_clicked();
+    void on_admixturesDefaultButton_clicked();
+    void on_siliconButton_clicked();
 };

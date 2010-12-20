@@ -63,3 +63,21 @@ void Widget::copyOthersDefaultFromModel()
     findChild<QDoubleSpinBox*>("TSpinner")->setValue(model->get_T());
     findChild<QDoubleSpinBox*>("surfacePotentialSpinner")->setValue(model->get_surface_potential());
 }
+
+void Widget::on_siliconButton_clicked()
+{
+    model->set_silicon();
+    copySiliconFromModel();
+}
+
+void Widget::on_admixturesDefaultButton_clicked()
+{
+    model->set_admixtures_default();
+    copyAdmixturesDefaultFromModel();
+}
+
+void Widget::on_othersDefaultButton_clicked()
+{
+    model->set_others_default();
+    copyOthersDefaultFromModel();
+}

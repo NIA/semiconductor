@@ -34,10 +34,6 @@ private:
     double density_acceptor; // cm^-3
     double density_donor; // cm^-3
 
-    void set_silicon();
-    void set_admixtures_default();
-    void set_others_default();
-
     double neutrality_function(double fermi_level);
 
     void compute_neutral_fermi_level();
@@ -58,6 +54,10 @@ private:
 
 public:
     Model();
+
+    void set_silicon();
+    void set_admixtures_default();
+    void set_others_default();
 
     void fill_data();
     const DataSeries & get_data() const { return data; }
