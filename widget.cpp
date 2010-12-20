@@ -11,11 +11,10 @@ Widget::Widget(Model * model, QWidget *parent) :
     model(model)
 {
     ui->setupUi(this);
-    QwtPlot * plotArea = findChild<QwtPlot*>("plotArea");
     curve = new QwtPlotCurve("Sine");
-    const DataSeries & data = model->get_data();
-    curve->setSamples(data.xs, data.ys);
-    curve->attach(plotArea);
+    curve->attach(findChild<QwtPlot*>("plotArea"));
+
+    refreshPlot();
 
     copySiliconFromModel();
     copyAdmixturesDefaultFromModel();
@@ -38,6 +37,13 @@ void Widget::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+void Widget::refreshPlot()
+{
+    model->fill_data();
+    const DataSeries & data = model->get_data();
+    curve->setSamples(data.xs, data.ys);
+    findChild<QwtPlot*>("plotArea")->replot();
 }
 
 void Widget::copySiliconFromModel()
@@ -80,4 +86,80 @@ void Widget::on_othersDefaultButton_clicked()
 {
     model->set_others_default();
     copyOthersDefaultFromModel();
+}
+
+void Widget::on_EgSpinner_valueChanged(double value)
+{
+    model->set_Eg_eV(value);
+    refreshPlot();
+}
+
+void Widget::on_mcSpinner_valueChanged(double value)
+{
+    model->set_mc_m0(value);
+    refreshPlot();
+}
+
+void Widget::on_mvSpinner_valueChanged(double value)
+{
+    model->set_mv_m0(value);
+    refreshPlot();
+}
+
+void Widget::on_permittivitySpinner_valueChanged(double value)
+{
+    model->set_permittivity(value);
+    refreshPlot();
+}
+
+void Widget::on_EaSpinner_valueChanged(double value)
+{
+    model->set_Ea_eV(value);
+    refreshPlot();
+}
+
+void Widget::on_EdSpinner_valueChanged(double value)
+{
+    model->set_Ed_eV(value);
+    refreshPlot();
+}
+
+void Widget::on_TSpinner_valueChanged(double value)
+{
+    model->set_T(value);
+    refreshPlot();
+}
+
+void Widget::on_surfacePotentialSpinner_valueChanged(double value)
+{
+    model->set_surface_potential(value);
+    refreshPlot();
+}
+
+void Widget::on_NaMantissaSpinner_valueChanged(double mantissa)
+{
+    double value = build_double(mantissa, findChild<QSpinBox*>("NaExponentSpinner")->value());
+    model->set_density_acceptor(value);
+    refreshPlot();
+}
+
+void Widget::on_NaExponentSpinner_valueChanged(int exponent)
+{
+    double value = build_double(findChild<QDoubleSpinBox*>("NaMantissaSpinner")->value(), exponent);
+    model->set_density_acceptor(value);
+    refreshPlot();
+}
+
+void Widget::on_NdMantissaSpinner_valueChanged(double mantissa)
+{
+    double value = build_double(mantissa, findChild<QSpinBox*>("NdExponentSpinner")->value());
+    model->set_density_donor(value);
+    refreshPlot();
+}
+
+void Widget::on_NdExponentSpinner_valueChanged(int exponent)
+{
+    double value = build_double(findChild<QDoubleSpinBox*>("NdMantissaSpinner")->value(), exponent);
+    model->set_density_donor(value);
+    refreshPlot();
 }

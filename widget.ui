@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>763</width>
-    <height>396</height>
+    <width>781</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,7 @@
              <double>2.000000000000000</double>
             </property>
             <property name="singleStep">
-             <double>0.050000000000000</double>
+             <double>0.010000000000000</double>
             </property>
            </widget>
           </item>
@@ -178,7 +178,7 @@
              <number>0</number>
             </property>
             <property name="minimum">
-             <double>1.000000000000000</double>
+             <double>100.000000000000000</double>
             </property>
             <property name="maximum">
              <double>999.000000000000000</double>
@@ -347,36 +347,6 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="NaMantissaSpinner">
-          <property name="decimals">
-           <number>1</number>
-          </property>
-          <property name="minimum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>10.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="2">
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>x 10^</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="QSpinBox" name="NaExponentSpinner">
-          <property name="value">
-           <number>17</number>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="4">
          <widget class="QLabel" name="label_10">
           <property name="text">
@@ -435,6 +405,36 @@
          <widget class="QPushButton" name="admixturesDefaultButton">
           <property name="text">
            <string>Set default</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QSpinBox" name="NaExponentSpinner">
+          <property name="value">
+           <number>17</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>x 10^</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="NaMantissaSpinner">
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>

@@ -30,3 +30,8 @@ inline double double_mantissa(double value)
 {
     return value/pow(10, double_exponent(value));
 }
+
+inline double build_double(double mantissa, int exponent)
+{
+    return mantissa*pow(10, exponent);
+}

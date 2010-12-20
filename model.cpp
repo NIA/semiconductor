@@ -63,7 +63,7 @@ void Model::fill_data()
         double x = i/100.;
 
         data.xs.push_back(x);
-        data.ys.push_back(sin(x));
+        data.ys.push_back(sin(x)*T);
     }
 }
 
@@ -113,7 +113,7 @@ void Model::compute_neutral_fermi_level()
 {
     double a = 0.0;
     double b = Eg;
-    double precision = 1e-3*std::min(Ea, Ed);
+    double precision = 1e-6*std::min(Ea, Ed);
 
     if( equal(0, neutrality_function(a)) )
     {

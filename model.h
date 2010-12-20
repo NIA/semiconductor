@@ -100,5 +100,4 @@ public:
 
     double get_density_donor() { return density_donor; } // cm^-3
     void set_density_donor(double value) { density_donor = value; } // cm^-3
-
 };

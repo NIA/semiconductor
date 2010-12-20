@@ -22,12 +22,25 @@ private:
     Model * model;
     QwtPlotCurve * curve;
 
+    void refreshPlot();
+
     void copySiliconFromModel();
     void copyAdmixturesDefaultFromModel();
     void copyOthersDefaultFromModel();
 
-
 private slots:
+    void on_NdExponentSpinner_valueChanged(int );
+    void on_NdMantissaSpinner_valueChanged(double );
+    void on_NaExponentSpinner_valueChanged(int );
+    void on_NaMantissaSpinner_valueChanged(double );
+    void on_surfacePotentialSpinner_valueChanged(double );
+    void on_TSpinner_valueChanged(double );
+    void on_EdSpinner_valueChanged(double );
+    void on_EaSpinner_valueChanged(double );
+    void on_permittivitySpinner_valueChanged(double );
+    void on_mvSpinner_valueChanged(double );
+    void on_mcSpinner_valueChanged(double );
+    void on_EgSpinner_valueChanged(double );
     void on_othersDefaultButton_clicked();
     void on_admixturesDefaultButton_clicked();
     void on_siliconButton_clicked();
