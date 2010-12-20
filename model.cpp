@@ -78,19 +78,24 @@ void Model::compute_eff_dencities()
     eff_density_v = eff_density(mv, T);
 }
 
+double Model::energy_exp(double energy_difference)
+{
+    return exp(energy_difference/(k * T));
+}
+
 double Model::fermi(double energy, double fermi_level)
 {
-    return exp((fermi_level - energy)/(k * T));
+    return 1/(1 + energy_exp(energy - fermi_level));
 }
 
 double Model::density_n(double energy, double fermi_level)
 {
-    return eff_density_c * fermi(energy, fermi_level);
+    return eff_density_c * energy_exp(fermi_level - energy);
 }
 
 double Model::density_p(double energy, double fermi_level)
 {
-    return eff_density_v * (1 - fermi(energy, fermi_level));
+    return eff_density_v * energy_exp(energy - fermi_level);
 }
 
 double Model::density_donor_p(double energy, double fermi_level)
@@ -111,7 +116,9 @@ double Model::neutrality_function(double fermi_level)
 
 void Model::compute_neutral_fermi_level()
 {
-    double a = 0.0;
+    compute_eff_dencities();
+
+    double a = 0;
     double b = Eg;
     double precision = 1e-6*std::min(Ea, Ed);
 
@@ -140,8 +147,4 @@ void Model::compute_neutral_fermi_level()
     }
 
     neutral_fermi_level = (a + b)/2;
-
-    double expected_precision = 1e-3*std::min(density_acceptor, density_donor);
-    Q_ASSERT_X( equal(0, neutrality_function(neutral_fermi_level), expected_precision),
-                "Model::compute_neutral_fermi_level", "bisection gave a wrong result: f(c) != 0");
 }

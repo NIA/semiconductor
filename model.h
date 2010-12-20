@@ -39,6 +39,8 @@ private:
     void compute_neutral_fermi_level();
     double neutral_fermi_level; // erg
 
+    // exp(energy_difference/kT)
+    double energy_exp(double energy_difference);
     // fermi distribution
     double fermi(double energy, double fermi_level); // <no unit>
 
