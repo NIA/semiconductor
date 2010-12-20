@@ -44,6 +44,8 @@ void Widget::refreshPlot()
     const DataSeries & data = model->get_data();
     curve->setSamples(data.xs, data.ys);
     findChild<QwtPlot*>("plotArea")->replot();
+
+    findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
 }
 
 void Widget::copySiliconFromModel()

@@ -62,6 +62,9 @@ public:
     void fill_data();
     const DataSeries & get_data() const { return data; }
 
+    double get_fermi_level_erg() { return neutral_fermi_level; }
+    double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }
+
     double get_Eg_erg() { return Eg; } // erg
     double get_Eg_eV() { return erg_to_electron_volt(Eg); } // eV
     void set_Eg_erg(double value) { Eg = value; } // erg
