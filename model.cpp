@@ -118,8 +118,8 @@ void Model::compute_neutral_fermi_level()
 {
     compute_eff_dencities();
 
-    double a = 0;
-    double b = Eg;
+    double a = -Eg;
+    double b = 2*Eg;
     double precision = 1e-6*std::min(Ea, Ed);
 
     if( equal(0, neutrality_function(a)) )

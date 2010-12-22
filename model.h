@@ -34,25 +34,25 @@ private:
     double density_acceptor; // cm^-3
     double density_donor; // cm^-3
 
-    double neutrality_function(double fermi_level);
-
-    void compute_neutral_fermi_level();
-    double neutral_fermi_level; // erg
+    void compute_eff_dencities();
+    double eff_density_c; // cm^-3
+    double eff_density_v; // cm^-3
 
     // exp(energy_difference/kT)
     double energy_exp(double energy_difference);
     // fermi distribution
     double fermi(double energy, double fermi_level); // <no unit>
 
-    void compute_eff_dencities();
-    double eff_density_c; // cm^-3
-    double eff_density_v; // cm^-3
-
     double density_n(double energy, double fermi_level);
     double density_p(double energy, double fermi_level);
 
     double density_donor_p(double energy, double fermi_level);
     double density_acceptor_n(double energy, double fermi_level);
+
+    double neutrality_function(double fermi_level);
+
+    void compute_neutral_fermi_level();
+    double neutral_fermi_level; // erg
 
 public:
     Model();
