@@ -4,6 +4,34 @@
 #include <qwt_plot.h>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
+#include <QSlider>
+
+namespace
+{
+    int MIN_DENSITY_EXPONENT = 15;
+    int MAX_DENSITY_EXPONENT = 20;
+
+    double density_slider_value(QSlider * slider)
+    {
+        Q_ASSERT(slider->maximum() != slider->minimum());
+        double fraction = float(slider->value() - slider->minimum())/(slider->maximum() - slider->minimum());
+        double exponent = MIN_DENSITY_EXPONENT + fraction*(MAX_DENSITY_EXPONENT - MIN_DENSITY_EXPONENT);
+        return pow(10, exponent);
+    }
+
+    void set_value_to_density_slider(QSlider * slider, double value)
+    {
+        Q_ASSERT(MAX_DENSITY_EXPONENT != MIN_DENSITY_EXPONENT);
+        double fraction = (log10(value) - MIN_DENSITY_EXPONENT)/(MAX_DENSITY_EXPONENT - MIN_DENSITY_EXPONENT);
+        double slider_value = slider->minimum() + fraction*(slider->maximum() - slider->minimum());
+        slider->setValue(slider_value);
+    }
+
+    inline QString format_density(double value)
+    {
+        return QString::number(value, 'e', 1);
+    }
+}
 
 Widget::Widget(Model * model, QWidget *parent) :
     QWidget(parent),
@@ -60,10 +88,8 @@ void Widget::copyAdmixturesDefaultFromModel()
 {
     findChild<QDoubleSpinBox*>("EaSpinner")->setValue(model->get_Ea_eV());
     findChild<QDoubleSpinBox*>("EdSpinner")->setValue(model->get_Ed_eV());
-    findChild<QDoubleSpinBox*>("NaMantissaSpinner")->setValue(double_mantissa(model->get_density_acceptor()));
-    findChild<QSpinBox*>("NaExponentSpinner")->setValue(double_exponent(model->get_density_acceptor()));
-    findChild<QDoubleSpinBox*>("NdMantissaSpinner")->setValue(double_mantissa(model->get_density_donor()));
-    findChild<QSpinBox*>("NdExponentSpinner")->setValue(double_exponent(model->get_density_donor()));
+    set_value_to_density_slider(findChild<QSlider*>("NaSlider"), model->get_density_acceptor());
+    set_value_to_density_slider(findChild<QSlider*>("NdSlider"), model->get_density_donor());
 }
 
 void Widget::copyOthersDefaultFromModel()
@@ -138,30 +164,20 @@ void Widget::on_surfacePotentialSpinner_valueChanged(double value)
     refreshPlot();
 }
 
-void Widget::on_NaMantissaSpinner_valueChanged(double mantissa)
+void Widget::on_NaSlider_valueChanged(int)
 {
-    double value = build_double(mantissa, findChild<QSpinBox*>("NaExponentSpinner")->value());
-    model->set_density_acceptor(value);
+    double Na_value = density_slider_value(reinterpret_cast<QSlider*>(sender()));
+    findChild<QLineEdit*>("NaLineEdit")->setText(format_density(Na_value));
+
+    model->set_density_acceptor(Na_value);
     refreshPlot();
 }
 
-void Widget::on_NaExponentSpinner_valueChanged(int exponent)
+void Widget::on_NdSlider_valueChanged(int)
 {
-    double value = build_double(findChild<QDoubleSpinBox*>("NaMantissaSpinner")->value(), exponent);
-    model->set_density_acceptor(value);
-    refreshPlot();
-}
+    double Nd_value = density_slider_value(reinterpret_cast<QSlider*>(sender()));
+    findChild<QLineEdit*>("NdLineEdit")->setText(format_density(Nd_value));
 
-void Widget::on_NdMantissaSpinner_valueChanged(double mantissa)
-{
-    double value = build_double(mantissa, findChild<QSpinBox*>("NdExponentSpinner")->value());
-    model->set_density_donor(value);
-    refreshPlot();
-}
-
-void Widget::on_NdExponentSpinner_valueChanged(int exponent)
-{
-    double value = build_double(findChild<QDoubleSpinBox*>("NdMantissaSpinner")->value(), exponent);
-    model->set_density_donor(value);
+    model->set_density_donor(Nd_value);
     refreshPlot();
 }

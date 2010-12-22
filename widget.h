@@ -29,10 +29,8 @@ private:
     void copyOthersDefaultFromModel();
 
 private slots:
-    void on_NdExponentSpinner_valueChanged(int );
-    void on_NdMantissaSpinner_valueChanged(double );
-    void on_NaExponentSpinner_valueChanged(int );
-    void on_NaMantissaSpinner_valueChanged(double );
+    void on_NdSlider_valueChanged(int value);
+    void on_NaSlider_valueChanged(int value);
     void on_surfacePotentialSpinner_valueChanged(double );
     void on_TSpinner_valueChanged(double );
     void on_EdSpinner_valueChanged(double );
