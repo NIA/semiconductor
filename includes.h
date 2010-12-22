@@ -18,3 +18,13 @@ inline double erg_to_electron_volt(double erg)
 {
     return erg/ELECTRON_VOLT_IN_ERGS;
 }
+
+const double VOLT_IN_CGS = 1.0/300;
+inline double volt_to_cgs(double volt)
+{
+    return volt*VOLT_IN_CGS;
+}
+inline double cgs_to_volt(double cgs)
+{
+    return cgs/VOLT_IN_CGS;
+}
