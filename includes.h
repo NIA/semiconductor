@@ -18,20 +18,3 @@ inline double erg_to_electron_volt(double erg)
 {
     return erg/ELECTRON_VOLT_IN_ERGS;
 }
-
-static const double ELECTRON_MASS = 9.1093e-28; // mass of electron, gramm
-
-inline int double_exponent(double value)
-{
-    return (int) floor( log10(value) );
-}
-
-inline double double_mantissa(double value)
-{
-    return value/pow(10, double_exponent(value));
-}
-
-inline double build_double(double mantissa, int exponent)
-{
-    return mantissa*pow(10, exponent);
-}
