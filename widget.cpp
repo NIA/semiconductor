@@ -69,8 +69,8 @@ void Widget::changeEvent(QEvent *e)
 void Widget::refreshPlot()
 {
     model->fill_data();
-    const DataSeries & data = model->get_data();
-    curve->setSamples(data.xs, data.ys);
+    model->get_bending_data_eV(plot_data);
+    curve->setSamples(plot_data.xs, plot_data.ys);
     findChild<QwtPlot*>("plotArea")->replot();
 
     findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
@@ -95,7 +95,7 @@ void Widget::copyAdmixturesDefaultFromModel()
 void Widget::copyOthersDefaultFromModel()
 {
     findChild<QDoubleSpinBox*>("TSpinner")->setValue(model->get_T());
-    findChild<QDoubleSpinBox*>("surfacePotentialSpinner")->setValue(model->get_surface_potential());
+    findChild<QDoubleSpinBox*>("surfacePotentialSpinner")->setValue(model->get_surface_potential_volt());
 }
 
 void Widget::on_siliconButton_clicked()
@@ -160,7 +160,7 @@ void Widget::on_TSpinner_valueChanged(double value)
 
 void Widget::on_surfacePotentialSpinner_valueChanged(double value)
 {
-    model->set_surface_potential(value);
+    model->set_surface_potential_volt(value);
     refreshPlot();
 }
 

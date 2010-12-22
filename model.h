@@ -7,17 +7,31 @@ struct DataSeries
     QVector<double> xs;
     QVector<double> ys;
 
-    int size()
+    int size() const
     {
         Q_ASSERT(xs.size() == ys.size());
         return xs.size();
     }
+
+    void clear()
+    {
+        xs.clear();
+        ys.clear();
+    }
+
+    void push_back(double x, double y)
+    {
+        xs.push_back(x);
+        ys.push_back(y);
+    }
 };
+
+const double electron_mass = 9.1093e-28; // mass of electron, gramm
 
 class Model
 {
 private:
-    DataSeries data;
+    DataSeries bending_data; // erg(cm)
 
     // Parameters
 
@@ -49,10 +63,12 @@ private:
     double density_donor_p(double energy, double fermi_level);
     double density_acceptor_n(double energy, double fermi_level);
 
-    double neutrality_function(double fermi_level);
+    double charge_density(double fermi_level /*erg*/, double zone_bending = 0 /*erg*/);
 
     void compute_neutral_fermi_level();
     double neutral_fermi_level; // erg
+
+    void solve_potential_equation(double surface_electric_field /*CGS*/, double xmax /*cm*/, double xstep /*cm*/);
 
 public:
     Model();
@@ -62,7 +78,8 @@ public:
     void set_others_default();
 
     void fill_data();
-    const DataSeries & get_data() const { return data; }
+    const DataSeries & get_bending_data_erg() const { return bending_data; }
+    void get_bending_data_eV(/*out*/ DataSeries & eV_data) const;
 
     double get_fermi_level_erg() { return neutral_fermi_level; }
     double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }
@@ -73,22 +90,25 @@ public:
     void set_Eg_eV(double value) { Eg = electron_volt_to_erg(value); } // eV
 
     double get_mc_gramm() { return mc; } // gramm
-    double get_mc_m0() { return mc/ELECTRON_MASS; } // m0
+    double get_mc_m0() { return mc/electron_mass; } // m0
     void set_mc_gramm(double value) { mc = value; } // gramm
-    void set_mc_m0(double value) { mc =  value * ELECTRON_MASS; } // m0
+    void set_mc_m0(double value) { mc =  value * electron_mass; } // m0
 
     double get_mv_gramm() { return mv; } // gramm
-    double get_mv_m0() { return mv/ELECTRON_MASS; } // m0
+    double get_mv_m0() { return mv/electron_mass; } // m0
     void set_mv_gramm(double value) { mv = value; } // gramm
-    void set_mv_m0(double value) { mv =  value * ELECTRON_MASS; } // m0
+    void set_mv_m0(double value) { mv =  value * electron_mass; } // m0
 
     double get_permittivity() { return permittivity; } // <no unit>
     void set_permittivity(double value) { permittivity = value; } // <no unit>
 
     double get_T() { return T; } // K
     void set_T(double value) { T = value; } // K
-    double get_surface_potential() { return surface_potential; }
-    void set_surface_potential(double value) { surface_potential = value; }
+
+    double get_surface_potential_CGS() { return surface_potential; }
+    void set_surface_potential_CGS(double value) { surface_potential = value; }
+    double get_surface_potential_volt() { return cgs_to_volt(surface_potential); }
+    void set_surface_potential_volt(double value) { surface_potential = volt_to_cgs(value); }
 
     double get_Ea_erg() { return Ea; } // erg
     double get_Ea_eV() { return erg_to_electron_volt(Ea); } // eV

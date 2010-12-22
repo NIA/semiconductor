@@ -20,6 +20,7 @@ protected:
 private:
     Ui::Widget *ui;
     Model * model;
+    DataSeries plot_data;
     QwtPlotCurve * curve;
 
     void refreshPlot();

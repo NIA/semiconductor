@@ -6,18 +6,20 @@ namespace
     // Fundametnal
     const double k = 1.380662e-16; // erg * K
     const double default_eff_density = 2.51e+19; // cm^-3
+    const double elementary_charge = 4.80320427e-10; // CGS
+    const double electron_charge = -elementary_charge; // CGS
 
     // Silicon:
     const double silicon_Eg = electron_volt_to_erg(1.12); // erg
-    const double silicon_mc = 0.36 * ELECTRON_MASS; // gramm
-    const double silicon_mv = 0.81 * ELECTRON_MASS; // gramm
+    const double silicon_mc = 0.36 * electron_mass; // gramme
+    const double silicon_mv = 0.81 * electron_mass; // gramme
     const double silicon_permittivity = 12; // <no unit>
 
     // Default:
     const double default_T = 300; // K
     const double default_density_admixture = 1e17; // cm^-3
     const double default_E_admixture = electron_volt_to_erg(0.045); // erg
-    const double default_surface_potential = 0.1; // V
+    const double default_surface_potential = volt_to_cgs(0.1); // CGS
 }
 
 Model::Model()
@@ -52,24 +54,22 @@ void Model::set_others_default()
 void Model::fill_data()
 {
     compute_neutral_fermi_level();
+    solve_potential_equation(0, 1e-3, 1e-6);
+}
 
-    // TODO: real data
+void Model::get_bending_data_eV(/*out*/ DataSeries & eV_data) const
+{
+    eV_data.clear();
 
-    data.xs.clear();
-    data.ys.clear();
-
-    for(int i = 0; i < 500; ++i)
+    for(int i = 0; i < bending_data.size(); ++i)
     {
-        double x = i/100.;
-
-        data.xs.push_back(x);
-        data.ys.push_back(sin(x)*T);
+        eV_data.push_back(bending_data.xs[i], erg_to_electron_volt(bending_data.ys[i]));
     }
 }
 
 double eff_density(double m, double T)
 {
-    return default_eff_density * pow((m/ELECTRON_MASS), (3./2.)) * pow((T/300), (3./2.));
+    return default_eff_density * pow((m/electron_mass), (3./2.)) * pow((T/300), (3./2.));
 }
 
 void Model::compute_eff_dencities()
@@ -108,10 +108,12 @@ double Model::density_acceptor_n(double energy, double fermi_level)
     return density_acceptor * fermi(energy, fermi_level);
 }
 
-double Model::neutrality_function(double fermi_level)
+double Model::charge_density(double fermi_level /*erg*/, double zone_bending /*erg*/)
 {
-    return density_donor_p(Eg - Ed, fermi_level) + density_p(0, fermi_level)
-          -density_n(Eg, fermi_level) - density_acceptor_n(Ea, fermi_level);
+    return elementary_charge*( density_p(0 + zone_bending, fermi_level)
+                             + density_donor_p(Eg - Ed + zone_bending, fermi_level)
+                             - density_n(Eg + zone_bending, fermi_level)
+                             - density_acceptor_n(Ea + zone_bending, fermi_level) );
 }
 
 void Model::compute_neutral_fermi_level()
@@ -122,29 +124,49 @@ void Model::compute_neutral_fermi_level()
     double b = 2*Eg;
     double precision = 1e-6*std::min(Ea, Ed);
 
-    if( equal(0, neutrality_function(a)) )
+    if( equal(0, charge_density(a)) )
     {
         neutral_fermi_level = a;
         return;
     }
-    if( equal(0, neutrality_function(b)) )
+    if( equal(0, charge_density(b)) )
     {
         neutral_fermi_level = b;
         return;
     }
 
-    Q_ASSERT_X(neutrality_function(a)*neutrality_function(b) < 0,
+    Q_ASSERT_X(charge_density(a)*charge_density(b) < 0,
                "Model::compute_neutral_fermi_level", "bisection failed: f(a)*f(b) > 0");
 
     while(b - a > precision)
     {
         double c = (a + b)/2;
 
-        if(neutrality_function(a)*neutrality_function(c) < 0)
+        if(charge_density(a)*charge_density(c) < 0)
             b = c;
         else
             a = c;
     }
 
     neutral_fermi_level = (a + b)/2;
+}
+
+void Model::solve_potential_equation(double surface_electric_field /*CGS*/, double xmax /*cm*/, double xstep /*cm*/)
+{
+    bending_data.clear();
+
+    double x = 0;
+    double potential = surface_potential;
+    double electric_field = surface_electric_field;
+
+    bending_data.push_back(x, electron_charge*potential);
+
+    while(x < xmax)
+    {
+        x += xstep;
+        electric_field += -4*M_PI/permittivity*charge_density(neutral_fermi_level, electron_charge*potential)*xstep;
+        potential += - electric_field*xstep;
+
+        bending_data.push_back(x, electron_charge*potential);
+    }
 }
