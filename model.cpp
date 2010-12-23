@@ -1,5 +1,6 @@
 #include "model.h"
 #include <cmath>
+#include <limits>
 
 namespace
 {
@@ -8,6 +9,7 @@ namespace
     const double default_eff_density = 2.51e+19; // cm^-3
     const double elementary_charge = 4.80320427e-10; // CGS
     const double electron_charge = -elementary_charge; // CGS
+    const double MAX_DOUBLE = std::numeric_limits<double>::max();
 
     // Silicon:
     const double silicon_Eg = electron_volt_to_erg(1.12); // erg
@@ -20,6 +22,11 @@ namespace
     const double default_density_admixture = 1e17; // cm^-3
     const double default_E_admixture = electron_volt_to_erg(0.045); // erg
     const double default_surface_potential = volt_to_cgs(0.1); // CGS
+
+    // Computation:
+    const double electric_field_min = -1e4;
+    const double electric_field_max = 1e4;
+    const double electric_field_step = 100;
 }
 
 Model::Model()
@@ -54,7 +61,8 @@ void Model::set_others_default()
 void Model::fill_data()
 {
     compute_neutral_fermi_level();
-    solve_potential_equation(0, 1e-3, 1e-6);
+    //solve_potential_equation(300, 3e-6, 1e-9);
+    do_shooting(3e-6, 5e-9);
 }
 
 void Model::get_bending_data_eV(/*out*/ DataSeries & eV_data) const
@@ -158,15 +166,43 @@ void Model::solve_potential_equation(double surface_electric_field /*CGS*/, doub
     double x = 0;
     double potential = surface_potential;
     double electric_field = surface_electric_field;
+    total_surface_charge = 0;
 
     bending_data.push_back(x, electron_charge*potential);
 
     while(x < xmax)
     {
+        double cur_charge_density = charge_density(neutral_fermi_level, electron_charge*potential);
         x += xstep;
-        electric_field += -4*M_PI/permittivity*charge_density(neutral_fermi_level, electron_charge*potential)*xstep;
+        electric_field += -4*M_PI/permittivity*cur_charge_density*xstep;
         potential += - electric_field*xstep;
+        total_surface_charge += cur_charge_density*xstep;
 
         bending_data.push_back(x, electron_charge*potential);
     }
+}
+
+void Model::do_shooting(double xmax /*cm*/, double xstep/*cm*/)
+{
+    double field = electric_field_min;
+
+    min_difference = MAX_DOUBLE;
+    double min_diff_field = 0;
+
+    while(field < electric_field_max)
+    {
+        solve_potential_equation(field, xmax, xstep);
+        double difference = total_surface_charge - permittivity*field/2/M_PI;
+        if(abs(difference) < min_difference)
+        {
+            min_difference = abs(difference);
+            min_diff_field = field;
+        }
+
+        field += electric_field_step;
+    }
+
+    surface_field = min_diff_field;
+
+    solve_potential_equation(min_diff_field, xmax, xstep);
 }

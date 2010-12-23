@@ -36,17 +36,23 @@ namespace
 Widget::Widget(Model * model, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget),
-    model(model)
+    model(model),
+    initializing(true)
 {
     ui->setupUi(this);
-    curve = new QwtPlotCurve("Sine");
-    curve->attach(findChild<QwtPlot*>("plotArea"));
+    QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
 
-    refreshPlot();
+    curve = new QwtPlotCurve("Sine");
+    curve->attach(plotArea);
+
 
     copySiliconFromModel();
     copyAdmixturesDefaultFromModel();
     copyOthersDefaultFromModel();
+
+    initializing = false;
+
+    refreshPlot();
 }
 
 Widget::~Widget()
@@ -68,12 +74,17 @@ void Widget::changeEvent(QEvent *e)
 }
 void Widget::refreshPlot()
 {
+    if(initializing)
+        return;
+
     model->fill_data();
     model->get_bending_data_eV(plot_data);
     curve->setSamples(plot_data.xs, plot_data.ys);
     findChild<QwtPlot*>("plotArea")->replot();
 
     findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
+    findChild<QLineEdit*>("differenceLineEdit")->setText(QString::number(model->get_difference(), 'e', 2));
+    findChild<QLineEdit*>("fieldLineEdit")->setText(QString::number(model->get_surface_field(), 'f', 2));
 }
 
 void Widget::copySiliconFromModel()

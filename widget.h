@@ -22,6 +22,7 @@ private:
     Model * model;
     DataSeries plot_data;
     QwtPlotCurve * curve;
+    bool initializing;
 
     void refreshPlot();
 

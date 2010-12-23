@@ -52,6 +52,10 @@ private:
     double eff_density_c; // cm^-3
     double eff_density_v; // cm^-3
 
+    double total_surface_charge; // CGS/cm^2
+    double min_difference; // CGS/cm^2
+    double surface_field; // CGS
+
     // exp(energy_difference/kT)
     double energy_exp(double energy_difference);
     // fermi distribution
@@ -63,11 +67,12 @@ private:
     double density_donor_p(double energy, double fermi_level);
     double density_acceptor_n(double energy, double fermi_level);
 
-    double charge_density(double fermi_level /*erg*/, double zone_bending = 0 /*erg*/);
+    double charge_density(double fermi_level /*erg*/, double zone_bending = 0 /*erg*/); // CGS/cm^3
 
     void compute_neutral_fermi_level();
     double neutral_fermi_level; // erg
 
+    void do_shooting(double xmax /*cm*/, double xstep/*cm*/);
     void solve_potential_equation(double surface_electric_field /*CGS*/, double xmax /*cm*/, double xstep /*cm*/);
 
 public:
@@ -125,4 +130,8 @@ public:
 
     double get_density_donor() { return density_donor; } // cm^-3
     void set_density_donor(double value) { density_donor = value; } // cm^-3
+
+    double get_total_surface_charge() { return total_surface_charge; } // CGS/cm^2
+    double get_difference() { return min_difference; } // CGS/cm^2
+    double get_surface_field() { return surface_field; } // CGS
 };
