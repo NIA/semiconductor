@@ -41,9 +41,12 @@ Widget::Widget(Model * model, QWidget *parent) :
 {
     ui->setupUi(this);
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
+    plotArea->setCanvasBackground(QColor(255,255,255));
 
     curve = new QwtPlotCurve("Sine");
     curve->attach(plotArea);
+    curve->setRenderHint(QwtPlotCurve::RenderAntialiased);
+    curve->setPen(QPen(QColor(50, 50, 200)));
 
 
     copySiliconFromModel();
