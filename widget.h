@@ -21,7 +21,12 @@ private:
     Ui::Widget *ui;
     Model * model;
     DataSeries plot_data;
-    QwtPlotCurve * curve;
+    QwtPlotCurve * bendingCurve;
+    QwtPlotCurve * EvCurve;
+    QwtPlotCurve * EcCurve;
+    QwtPlotCurve * EdCurve;
+    QwtPlotCurve * EaCurve;
+    QwtPlotCurve * fermiLevelCurve;
     bool initializing;
 
     void refreshPlot();

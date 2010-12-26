@@ -27,6 +27,7 @@ namespace
     const double electric_field_min = -1e4;
     const double electric_field_max = 1e4;
     const double electric_field_step = 100;
+    const double xmax = 3e-6;
 }
 
 Model::Model()
@@ -205,4 +206,9 @@ void Model::do_shooting(double xmax /*cm*/, double xstep/*cm*/)
     surface_field = min_diff_field;
 
     solve_potential_equation(min_diff_field, xmax, xstep);
+}
+
+double Model::get_xmax() // cm
+{
+    return xmax;
 }

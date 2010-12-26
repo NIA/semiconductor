@@ -134,4 +134,6 @@ public:
     double get_total_surface_charge() { return total_surface_charge; } // CGS/cm^2
     double get_difference() { return min_difference; } // CGS/cm^2
     double get_surface_field() { return surface_field; } // CGS
+
+    double get_xmax(); // cm
 };

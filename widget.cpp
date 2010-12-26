@@ -31,6 +31,20 @@ namespace
     {
         return QString::number(value, 'e', 1);
     }
+
+    void configure_curve(QwtPlotCurve ** curve, QwtPlot * plot, const char* name, QColor color, Qt::PenStyle style = Qt::SolidLine)
+    {
+        (*curve) = new QwtPlotCurve(name);
+        (*curve)->attach(plot);
+        (*curve)->setPen(QPen(color, 1, style));
+    }
+
+    void set_level(QwtPlotCurve * curve, double value, double xmin, double xmax)
+    {
+        double xs[2] = {xmin, xmax};
+        double ys[2] = {value, value};
+        curve->setSamples(xs, ys, 2);
+    }
 }
 
 Widget::Widget(Model * model, QWidget *parent) :
@@ -43,11 +57,13 @@ Widget::Widget(Model * model, QWidget *parent) :
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
     plotArea->setCanvasBackground(QColor(255,255,255));
 
-    curve = new QwtPlotCurve("Sine");
-    curve->attach(plotArea);
-    curve->setRenderHint(QwtPlotCurve::RenderAntialiased);
-    curve->setPen(QPen(QColor(50, 50, 200)));
-
+    configure_curve(&bendingCurve, plotArea, "Bending", QColor(50, 50, 200));
+    bendingCurve->setRenderHint(QwtPlotCurve::RenderAntialiased);
+    configure_curve(&EvCurve, plotArea, "Ev", Qt::black);
+    configure_curve(&EcCurve, plotArea, "Ec", Qt::black);
+    configure_curve(&EdCurve, plotArea, "Ed", Qt::black, Qt::DashLine);
+    configure_curve(&EaCurve, plotArea, "Ea", Qt::black, Qt::DashLine);
+    configure_curve(&fermiLevelCurve, plotArea, "Fermi Level", Qt::red, Qt::DashDotLine);
 
     copySiliconFromModel();
     copyAdmixturesDefaultFromModel();
@@ -60,7 +76,12 @@ Widget::Widget(Model * model, QWidget *parent) :
 
 Widget::~Widget()
 {
-    delete curve;
+    delete bendingCurve;
+    delete EvCurve;
+    delete EcCurve;
+    delete EdCurve;
+    delete EaCurve;
+    delete fermiLevelCurve;
     delete ui;
 }
 
@@ -82,8 +103,21 @@ void Widget::refreshPlot()
 
     model->fill_data();
     model->get_bending_data_eV(plot_data);
-    curve->setSamples(plot_data.xs, plot_data.ys);
-    findChild<QwtPlot*>("plotArea")->replot();
+    bendingCurve->setSamples(plot_data.xs, plot_data.ys);
+
+    double xmin = 0;
+    double xmax = model->get_xmax();
+    double Ev = 0;
+    double Ec = Ev + model->get_Eg_eV();
+    set_level(EvCurve, Ev, xmin, xmax);
+    set_level(EcCurve, Ec, xmin, xmax);
+    set_level(EaCurve, Ev + model->get_Ea_eV(), xmin, xmax);
+    set_level(EdCurve, Ec - model->get_Ed_eV(), xmin, xmax);
+    set_level(fermiLevelCurve, Ev + model->get_fermi_level_eV(), xmin, xmax);
+
+    QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
+    plotArea->setAxisScale(QwtPlot::xBottom, 0, xmax);
+    plotArea->replot();
 
     findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
     findChild<QLineEdit*>("differenceLineEdit")->setText(QString::number(model->get_difference(), 'e', 2));
