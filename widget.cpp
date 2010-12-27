@@ -261,7 +261,14 @@ void Widget::update_Na()
     double Na_value = density_slider_value(findChild<QSlider*>("NaSlider"));
     findChild<QLineEdit*>("NaLineEdit")->setText(format_density(Na_value));
 
-    model->set_density_acceptor(Na_value);
+    if(acceptorEnabled)
+    {
+        model->set_density_acceptor(Na_value);
+    }
+    else
+    {
+        model->set_density_acceptor(0);
+    }
 }
 
 void Widget::update_Nd()
@@ -269,7 +276,15 @@ void Widget::update_Nd()
     double Nd_value = density_slider_value(findChild<QSlider*>("NdSlider"));
     findChild<QLineEdit*>("NdLineEdit")->setText(format_density(Nd_value));
 
-    model->set_density_donor(Nd_value);
+    if(donorEnabled)
+    {
+
+        model->set_density_donor(Nd_value);
+    }
+    else
+    {
+        model->set_density_donor(0);
+    }
 }
 
 void Widget::on_NaSlider_valueChanged(int)
@@ -287,15 +302,14 @@ void Widget::on_NdSlider_valueChanged(int)
 void Widget::on_acceptorCheckBox_stateChanged(int check_state)
 {
     acceptorEnabled = (check_state == Qt::Checked);
+    update_Na();
     if(acceptorEnabled)
     {
-        update_Na();
         if(plotVariant == PV_FERMI_DISTRIBUTION || plotVariant == PV_FERMI_LEVEL)
             EaCurve->attach(findChild<QwtPlot*>("plotArea"));
     }
     else
     {
-        model->set_density_acceptor(0);
         EaCurve->detach();
     }
 
@@ -308,15 +322,14 @@ void Widget::on_acceptorCheckBox_stateChanged(int check_state)
 void Widget::on_donorCheckBox_stateChanged(int check_state)
 {
     donorEnabled = (check_state == Qt::Checked);
+    update_Nd();
     if(donorEnabled)
     {
-        update_Nd();
         if(plotVariant == PV_FERMI_DISTRIBUTION || plotVariant == PV_FERMI_LEVEL)
             EdCurve->attach(findChild<QwtPlot*>("plotArea"));
     }
     else
     {
-        model->set_density_donor(0);
         EdCurve->detach();
     }
 
