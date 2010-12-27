@@ -3,6 +3,7 @@
 #include <QtGlobal> // for Q_ASSERT
 #include <cmath>
 
+const double k = 1.380662e-16; // erg * K
 const int DEFAULT_PRECISION = 1e-14;
 inline bool equal(double a, double b, double precision = DEFAULT_PRECISION)
 {

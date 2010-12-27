@@ -31,8 +31,10 @@ const double electron_mass = 9.1093e-28; // mass of electron, gramm
 class Model
 {
 private:
-    DataSeries bending_data; // erg(cm)
     DataSeries fermi_data; // erg(1)
+    DataSeries fermi_level_data; // erg(1/kT)
+    DataSeries Na_data; // log Na(1/kT)
+    DataSeries Nd_data; // log Na(1/kT)
 
     // Parameters
 
@@ -41,15 +43,17 @@ private:
     double mv; // gramm
     double permittivity; // <no unit>
 
-    double T; // K
-    double surface_potential; // V
+    double Tcurrent; // K
+    double Tmin; // K
+    double Tmax; // K
+    double Tstep; // K
 
     double Ea; // erg
     double Ed; // erg
     double density_acceptor; // cm^-3
     double density_donor; // cm^-3
 
-    void compute_eff_dencities();
+    void compute_eff_dencities(double T);
     double eff_density_c; // cm^-3
     double eff_density_v; // cm^-3
 
@@ -58,24 +62,23 @@ private:
     double surface_field; // CGS
 
     // exp(energy_difference/kT)
-    double energy_exp(double energy_difference);
+    double energy_exp(double energy_difference, double T);
     // fermi distribution
-    double fermi(double energy, double fermi_level); // <no unit>
+    double fermi(double energy, double fermi_level, double T); // <no unit>
 
-    double density_n(double energy, double fermi_level);
-    double density_p(double energy, double fermi_level);
+    double density_n(double fermi_level, double T);
+    double density_p(double fermi_level, double T);
 
-    double density_donor_p(double energy, double fermi_level);
-    double density_acceptor_n(double energy, double fermi_level);
+    double density_donor_p(double fermi_level, double T);
+    double density_acceptor_n(double fermi_level, double T);
 
-    double charge_density(double fermi_level /*erg*/, double zone_bending = 0 /*erg*/); // CGS/cm^3
+    double charge_density(double fermi_level /*erg*/, double T /*K*/); // CGS/cm^3
 
-    void compute_neutral_fermi_level();
+    double compute_neutral_fermi_level(double T);
     double neutral_fermi_level; // erg
 
-    void do_shooting(double xmax /*cm*/, double xstep/*cm*/);
-    void solve_potential_equation(double surface_electric_field /*CGS*/, double xmax /*cm*/, double xstep /*cm*/);
     void compute_fermi_distribution(double Estep /*erg*/);
+    void compute_dependences();
 
 public:
     Model();
@@ -85,10 +88,12 @@ public:
     void set_others_default();
 
     void fill_data();
-    const DataSeries & get_bending_data_erg() const { return bending_data; }
-    void get_bending_data_eV(/*out*/ DataSeries & eV_data) const;
     const DataSeries & get_fermi_data_erg() const { return fermi_data; }
     void get_fermi_data_eV(/*out*/ DataSeries & eV_data) const;
+
+    void get_fermi_level_data_eV(/*out*/ DataSeries & eV_data) const;
+    const DataSeries & get_Na_data() const { return Na_data; }
+    const DataSeries & get_Nd_data() const { return Nd_data; }
 
     double get_fermi_level_erg() { return neutral_fermi_level; }
     double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }
@@ -111,13 +116,14 @@ public:
     double get_permittivity() { return permittivity; } // <no unit>
     void set_permittivity(double value) { permittivity = value; } // <no unit>
 
-    double get_T() { return T; } // K
-    void set_T(double value) { T = value; } // K
-
-    double get_surface_potential_CGS() { return surface_potential; }
-    void set_surface_potential_CGS(double value) { surface_potential = value; }
-    double get_surface_potential_volt() { return cgs_to_volt(surface_potential); }
-    void set_surface_potential_volt(double value) { surface_potential = volt_to_cgs(value); }
+    double get_T() { return Tcurrent; } // K
+    void set_T(double value) { Tcurrent = value; } // K
+    double get_Tmin() { return Tmin; } // K
+    void set_Tmin(double value) { Tmin = value; } // K
+    double get_Tmax() { return Tmax; } // K
+    void set_Tmax(double value) { Tmax = value; } // K
+    double get_Tstep() { return Tstep; } // K
+    void set_Tstep(double value) { Tstep = value; } // K
 
     double get_Ea_erg() { return Ea; } // erg
     double get_Ea_eV() { return erg_to_electron_volt(Ea); } // eV
@@ -134,10 +140,4 @@ public:
 
     double get_density_donor() { return density_donor; } // cm^-3
     void set_density_donor(double value) { density_donor = value; } // cm^-3
-
-    double get_total_surface_charge() { return total_surface_charge; } // CGS/cm^2
-    double get_difference() { return min_difference; } // CGS/cm^2
-    double get_surface_field() { return surface_field; } // CGS
-
-    double get_xmax(); // cm
 };

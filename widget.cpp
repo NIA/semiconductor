@@ -6,6 +6,7 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QCheckBox>
+#include <QComboBox>
 
 namespace
 {
@@ -46,6 +47,23 @@ namespace
         double ys[2] = {value, value};
         curve->setSamples(xs, ys, 2);
     }
+
+    enum PlotVariant
+    {
+        PV_FERMI_DISTRIBUTION,
+        PV_FERMI_LEVEL,
+        PV_NA,
+        PV_ND,
+        _PV_COUNT
+    };
+
+    const QString plot_captions[_PV_COUNT] =
+    {
+        "Fermi distribution(Energy)",
+        "Fermi level(1/kT)",
+        "log Charged acceptors(1/kT)",
+        "log Charged donors(1/kT)"
+    };
 }
 
 Widget::Widget(Model * model, QWidget *parent) :
@@ -54,14 +72,15 @@ Widget::Widget(Model * model, QWidget *parent) :
     model(model),
     initializing(true),
     acceptorEnabled(false),
-    donorEnabled(true)
+    donorEnabled(true),
+    plotVariant(PV_FERMI_DISTRIBUTION)
 {
     ui->setupUi(this);
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
     plotArea->setCanvasBackground(QColor(255,255,255));
 
-    configure_curve(&bendingCurve, plotArea, "Bending", QColor(50, 50, 200));
-    bendingCurve->setRenderHint(QwtPlotCurve::RenderAntialiased);
+    configure_curve(&mainCurve, plotArea, "Bending", QColor(50, 50, 200));
+    mainCurve->setRenderHint(QwtPlotCurve::RenderAntialiased);
     configure_curve(&EvCurve, plotArea, "Ev", Qt::black);
     configure_curve(&EcCurve, plotArea, "Ec", Qt::black);
     configure_curve(&EdCurve, plotArea, "Ed", Qt::black, Qt::DashLine);
@@ -75,6 +94,13 @@ Widget::Widget(Model * model, QWidget *parent) :
     findChild<QCheckBox*>("acceptorCheckBox")->setChecked(acceptorEnabled);
     findChild<QCheckBox*>("donorCheckBox")->setChecked(donorEnabled);
 
+    QComboBox * plotVariantsComboBox = findChild<QComboBox*>("plotVariantsComboBox");
+    for(int i = 0; i < _PV_COUNT; ++i)
+    {
+        plotVariantsComboBox->addItem(plot_captions[i], i);
+    }
+    plotVariantsComboBox->setCurrentIndex(plotVariant);
+
     initializing = false;
 
     refreshPlot();
@@ -82,7 +108,7 @@ Widget::Widget(Model * model, QWidget *parent) :
 
 Widget::~Widget()
 {
-    delete bendingCurve;
+    delete mainCurve;
     delete EvCurve;
     delete EcCurve;
     delete EdCurve;
@@ -107,14 +133,35 @@ void Widget::refreshPlot()
     if(initializing)
         return;
 
-    model->fill_data();
-    model->get_fermi_data_eV(plot_data);
-    bendingCurve->setSamples(plot_data.xs, plot_data.ys);
+    model->fill_data();  
+    findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
 
-    double xmin = 0;
-    double xmax = 1;
     double Ev = 0;
     double Ec = Ev + model->get_Eg_eV();
+
+    switch(plotVariant)
+    {
+    case PV_FERMI_DISTRIBUTION:
+        model->get_fermi_data_eV(plot_data);
+        mainCurve->setSamples(plot_data.xs, plot_data.ys);
+        break;
+
+    case PV_FERMI_LEVEL:
+        model->get_fermi_level_data_eV(plot_data);
+        mainCurve->setSamples(plot_data.xs, plot_data.ys);
+        break;
+
+    case PV_NA:
+        mainCurve->setSamples(model->get_Na_data().xs, model->get_Na_data().ys);
+        break;
+
+    case PV_ND:
+        mainCurve->setSamples(model->get_Nd_data().xs, model->get_Nd_data().ys);
+        break;
+    }
+
+    double xmin = mainCurve->minXValue();
+    double xmax = mainCurve->maxXValue();
     set_level(EvCurve, Ev, xmin, xmax);
     set_level(EcCurve, Ec, xmin, xmax);
     set_level(EaCurve, Ev + model->get_Ea_eV(), xmin, xmax);
@@ -122,12 +169,7 @@ void Widget::refreshPlot()
     set_level(fermiLevelCurve, Ev + model->get_fermi_level_eV(), xmin, xmax);
 
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
-    plotArea->setAxisScale(QwtPlot::xBottom, 0, xmax);
     plotArea->replot();
-
-    findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
-    findChild<QLineEdit*>("differenceLineEdit")->setText(QString::number(model->get_difference(), 'e', 2));
-    findChild<QLineEdit*>("fieldLineEdit")->setText(QString::number(model->get_surface_field(), 'f', 2));
 }
 
 void Widget::copySiliconFromModel()
@@ -149,7 +191,9 @@ void Widget::copyAdmixturesDefaultFromModel()
 void Widget::copyOthersDefaultFromModel()
 {
     findChild<QDoubleSpinBox*>("TSpinner")->setValue(model->get_T());
-    findChild<QDoubleSpinBox*>("surfacePotentialSpinner")->setValue(model->get_surface_potential_volt());
+    findChild<QDoubleSpinBox*>("TminSpinner")->setValue(model->get_Tmin());
+    findChild<QDoubleSpinBox*>("TmaxSpinner")->setValue(model->get_Tmax());
+    findChild<QDoubleSpinBox*>("TstepSpinner")->setValue(model->get_Tstep());
 }
 
 void Widget::on_siliconButton_clicked()
@@ -212,12 +256,6 @@ void Widget::on_TSpinner_valueChanged(double value)
     refreshPlot();
 }
 
-void Widget::on_surfacePotentialSpinner_valueChanged(double value)
-{
-    model->set_surface_potential_volt(value);
-    refreshPlot();
-}
-
 void Widget::update_Na()
 {
     double Na_value = density_slider_value(findChild<QSlider*>("NaSlider"));
@@ -252,7 +290,8 @@ void Widget::on_acceptorCheckBox_stateChanged(int check_state)
     if(acceptorEnabled)
     {
         update_Na();
-        EaCurve->attach(findChild<QwtPlot*>("plotArea"));
+        if(plotVariant == PV_FERMI_DISTRIBUTION || plotVariant == PV_FERMI_LEVEL)
+            EaCurve->attach(findChild<QwtPlot*>("plotArea"));
     }
     else
     {
@@ -272,7 +311,8 @@ void Widget::on_donorCheckBox_stateChanged(int check_state)
     if(donorEnabled)
     {
         update_Nd();
-        EdCurve->attach(findChild<QwtPlot*>("plotArea"));
+        if(plotVariant == PV_FERMI_DISTRIBUTION || plotVariant == PV_FERMI_LEVEL)
+            EdCurve->attach(findChild<QwtPlot*>("plotArea"));
     }
     else
     {
@@ -284,4 +324,59 @@ void Widget::on_donorCheckBox_stateChanged(int check_state)
     findChild<QSlider*>("NdSlider")->setEnabled(donorEnabled);
     findChild<QLineEdit*>("NdLineEdit")->setEnabled(donorEnabled);
     refreshPlot();
+}
+
+void Widget::on_TminSpinner_valueChanged(double value)
+{
+    model->set_Tmin(value);
+    refreshPlot();
+}
+
+void Widget::on_TmaxSpinner_valueChanged(double value)
+{
+    model->set_Tmax(value);
+    refreshPlot();
+}
+
+void Widget::on_TstepSpinner_valueChanged(double value)
+{
+    model->set_Tstep(value);
+    refreshPlot();
+}
+
+void Widget::on_plotVariantsComboBox_currentIndexChanged(int index)
+{
+    plotVariant = index;
+    reattach_level_curves();
+    refreshPlot();
+}
+
+void Widget::reattach_level_curves()
+{
+    QwtPlot * plotArea = findChild<QwtPlot*>("plotArea");
+    if(plotVariant == PV_FERMI_DISTRIBUTION || plotVariant == PV_FERMI_LEVEL)
+    {
+        EcCurve->attach(plotArea);
+        EvCurve->attach(plotArea);
+        if(acceptorEnabled)
+            EaCurve->attach(plotArea);
+        if(donorEnabled)
+            EdCurve->attach(plotArea);
+    }
+    else
+    {
+        EcCurve->detach();
+        EvCurve->detach();
+        EaCurve->detach();
+        EdCurve->detach();
+    }
+
+    if(plotVariant == PV_FERMI_DISTRIBUTION)
+    {
+        fermiLevelCurve->attach(plotArea);
+    }
+    else
+    {
+        fermiLevelCurve->detach();
+    }
 }

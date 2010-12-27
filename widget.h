@@ -21,7 +21,7 @@ private:
     Ui::Widget *ui;
     Model * model;
     DataSeries plot_data;
-    QwtPlotCurve * bendingCurve;
+    QwtPlotCurve * mainCurve;
     QwtPlotCurve * EvCurve;
     QwtPlotCurve * EcCurve;
     QwtPlotCurve * EdCurve;
@@ -32,6 +32,9 @@ private:
     bool acceptorEnabled;
     bool donorEnabled;
 
+    int plotVariant;
+
+    void reattach_level_curves();
     void refreshPlot();
 
     void copySiliconFromModel();
@@ -42,11 +45,14 @@ private:
     void update_Nd();
 
 private slots:
+    void on_plotVariantsComboBox_currentIndexChanged(int index);
+    void on_TstepSpinner_valueChanged(double );
+    void on_TmaxSpinner_valueChanged(double );
+    void on_TminSpinner_valueChanged(double );
     void on_donorCheckBox_stateChanged(int );
     void on_acceptorCheckBox_stateChanged(int );
     void on_NdSlider_valueChanged(int value);
     void on_NaSlider_valueChanged(int value);
-    void on_surfacePotentialSpinner_valueChanged(double );
     void on_TSpinner_valueChanged(double );
     void on_EdSpinner_valueChanged(double );
     void on_EaSpinner_valueChanged(double );

@@ -5,7 +5,6 @@
 namespace
 {
     // Fundametnal
-    const double k = 1.380662e-16; // erg * K
     const double default_eff_density = 2.51e+19; // cm^-3
     const double elementary_charge = 4.80320427e-10; // CGS
     const double electron_charge = -elementary_charge; // CGS
@@ -19,7 +18,11 @@ namespace
 
     // Default:
     const double default_T = 300; // K
-    const double default_density_admixture = 1e17; // cm^-3
+    const double default_Tmin = 50; // K
+    const double default_Tmax = 1500; // K
+    const double default_Tstep = 1; // K
+    const double default_density_donor = 1e17; // cm^-3
+    const double default_density_acceptor = 5e16; // cm^-3
     const double default_E_admixture = electron_volt_to_erg(0.045); // erg
     const double default_surface_potential = volt_to_cgs(0.1); // CGS
 
@@ -49,32 +52,23 @@ void Model::set_admixtures_default()
 {
     Ea = default_E_admixture;
     Ed = default_E_admixture;
-    density_acceptor = default_density_admixture;
-    density_donor = default_density_admixture;
+    density_acceptor = default_density_acceptor;
+    density_donor = default_density_donor;
 }
 
 void Model::set_others_default()
 {
-    T = default_T;
-    surface_potential = default_surface_potential;
+    Tcurrent = default_T;
+    Tmin = default_Tmin;
+    Tmax = default_Tmax;
+    Tstep = default_Tstep;
 }
 
 void Model::fill_data()
 {
-    compute_neutral_fermi_level();
-    //solve_potential_equation(surface_field, xmax, xmax/1e3);
-    //do_shooting(3e-6, 5e-9);
+    neutral_fermi_level = compute_neutral_fermi_level(Tcurrent);
     compute_fermi_distribution(Eg/500);
-}
-
-void Model::get_bending_data_eV(/*out*/ DataSeries & eV_data) const
-{
-    eV_data.clear();
-
-    for(int i = 0; i < bending_data.size(); ++i)
-    {
-        eV_data.push_back(bending_data.xs[i], erg_to_electron_volt(bending_data.ys[i]));
-    }
+    compute_dependences();
 }
 
 void Model::get_fermi_data_eV(/*out*/ DataSeries & eV_data) const
@@ -87,149 +81,124 @@ void Model::get_fermi_data_eV(/*out*/ DataSeries & eV_data) const
     }
 }
 
+void Model::get_fermi_level_data_eV(/*out*/ DataSeries & eV_data) const
+{
+    eV_data.clear();
+
+    for(int i = 0; i < fermi_level_data.size(); ++i)
+    {
+        eV_data.push_back(fermi_level_data.xs[i], erg_to_electron_volt(fermi_level_data.ys[i]));
+    }
+}
+
 double eff_density(double m, double T)
 {
     return default_eff_density * pow((m/electron_mass), (3./2.)) * pow((T/300), (3./2.));
 }
 
-void Model::compute_eff_dencities()
+void Model::compute_eff_dencities(double T)
 {
     eff_density_c = eff_density(mc, T);
     eff_density_v = eff_density(mv, T);
 }
 
-double Model::energy_exp(double energy_difference)
+double Model::energy_exp(double energy_difference, double T)
 {
     return exp(energy_difference/(k * T));
 }
 
-double Model::fermi(double energy, double fermi_level)
+double Model::fermi(double energy, double fermi_level, double T)
 {
-    return 1/(1 + energy_exp(energy - fermi_level));
+    return 1/(1 + energy_exp(energy - fermi_level, T));
 }
 
-double Model::density_n(double energy, double fermi_level)
+double Model::density_n(double fermi_level, double T)
 {
-    return eff_density_c * energy_exp(fermi_level - energy);
+    return eff_density_c * energy_exp(fermi_level - Eg, T);
 }
 
-double Model::density_p(double energy, double fermi_level)
+double Model::density_p(double fermi_level, double T)
 {
-    return eff_density_v * energy_exp(energy - fermi_level);
+    return eff_density_v * energy_exp(0 - fermi_level, T);
 }
 
-double Model::density_donor_p(double energy, double fermi_level)
+double Model::density_donor_p(double fermi_level, double T)
 {
-    return density_donor * (1 - fermi(energy, fermi_level));
+    return density_donor * (1 - fermi(Eg - Ed, fermi_level, T));
 }
 
-double Model::density_acceptor_n(double energy, double fermi_level)
+double Model::density_acceptor_n(double fermi_level, double T)
 {
-    return density_acceptor * fermi(energy, fermi_level);
+    return density_acceptor * fermi(Ea, fermi_level, T);
 }
 
-double Model::charge_density(double fermi_level /*erg*/, double zone_bending /*erg*/)
+double Model::charge_density(double fermi_level /*erg*/, double T /*K*/)
 {
-    return elementary_charge*( density_p(0 + zone_bending, fermi_level)
-                             + density_donor_p(Eg - Ed + zone_bending, fermi_level)
-                             - density_n(Eg + zone_bending, fermi_level)
-                             - density_acceptor_n(Ea + zone_bending, fermi_level) );
+    return elementary_charge*( density_p(fermi_level, T)
+                             + density_donor_p(fermi_level, T)
+                             - density_n(fermi_level, T)
+                             - density_acceptor_n(fermi_level, T) );
 }
 
-void Model::compute_neutral_fermi_level()
+double Model::compute_neutral_fermi_level(double T)
 {
-    compute_eff_dencities();
+    compute_eff_dencities(T);
 
     double a = -Eg;
     double b = 2*Eg;
     double precision = 1e-6*std::min(Ea, Ed);
 
-    if( equal(0, charge_density(a)) )
+    if( equal(0, charge_density(a, T)) )
     {
-        neutral_fermi_level = a;
-        return;
+        return a;
     }
-    if( equal(0, charge_density(b)) )
+    if( equal(0, charge_density(b, T)) )
     {
-        neutral_fermi_level = b;
-        return;
+        return b;
     }
 
-    Q_ASSERT_X(charge_density(a)*charge_density(b) < 0,
+    Q_ASSERT_X(charge_density(a, T)*charge_density(b, T) < 0,
                "Model::compute_neutral_fermi_level", "bisection failed: f(a)*f(b) > 0");
 
     while(b - a > precision)
     {
         double c = (a + b)/2;
 
-        if(charge_density(a)*charge_density(c) < 0)
+        if(charge_density(a, T)*charge_density(c, T) < 0)
             b = c;
         else
             a = c;
     }
 
-    neutral_fermi_level = (a + b)/2;
-}
-
-void Model::solve_potential_equation(double surface_electric_field /*CGS*/, double xmax /*cm*/, double xstep /*cm*/)
-{
-    bending_data.clear();
-
-    double x = 0;
-    double potential = surface_potential;
-    double electric_field = surface_electric_field;
-    total_surface_charge = 0;
-
-    bending_data.push_back(x, electron_charge*potential);
-
-    while(x < xmax)
-    {
-        double cur_charge_density = charge_density(neutral_fermi_level, electron_charge*potential);
-        x += xstep;
-        electric_field += -4*M_PI/permittivity*cur_charge_density*xstep;
-        potential += - electric_field*xstep;
-        total_surface_charge += cur_charge_density*xstep;
-
-        bending_data.push_back(x, electron_charge*potential);
-    }
-}
-
-void Model::do_shooting(double xmax /*cm*/, double xstep/*cm*/)
-{
-    double field = electric_field_min;
-
-    min_difference = MAX_DOUBLE;
-    double min_diff_field = 0;
-
-    while(field < electric_field_max)
-    {
-        solve_potential_equation(field, xmax, xstep);
-        double difference = total_surface_charge - permittivity*field/2/M_PI;
-        if(abs(difference) < min_difference)
-        {
-            min_difference = abs(difference);
-            min_diff_field = field;
-        }
-
-        field += electric_field_step;
-    }
-
-    surface_field = min_diff_field;
-
-    solve_potential_equation(min_diff_field, xmax, xstep);
-}
-
-double Model::get_xmax() // cm
-{
-    return xmax;
+    return (a + b)/2;
 }
 
 void Model::compute_fermi_distribution(double Estep /*erg*/)
 {
     fermi_data.clear();
 
-    for(double E = 0; E < Eg; E+= Estep)
+    for(double E = 0; E <= Eg; E+= Estep)
     {
-        fermi_data.push_back(fermi(E, neutral_fermi_level), E);
+        fermi_data.push_back(fermi(E, neutral_fermi_level, Tcurrent), E);
     }
 }
+
+void Model::compute_dependences()
+{
+    fermi_level_data.clear();
+    Nd_data.clear();
+    Na_data.clear();
+
+    double fermi_level;
+    double kT_inv;
+    for(double T = Tmin; T <= Tmax; T += Tstep)
+    {
+        fermi_level = compute_neutral_fermi_level(T);
+        kT_inv = 1/erg_to_electron_volt(k*T);
+
+        fermi_level_data.push_back(kT_inv, fermi_level);
+        Nd_data.push_back(kT_inv, log10(density_donor_p(fermi_level,T)));
+        Na_data.push_back(kT_inv, log10(density_acceptor_n(fermi_level, T)));
+    }
+}
+
