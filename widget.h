@@ -29,13 +29,21 @@ private:
     QwtPlotCurve * fermiLevelCurve;
     bool initializing;
 
+    bool acceptorEnabled;
+    bool donorEnabled;
+
     void refreshPlot();
 
     void copySiliconFromModel();
     void copyAdmixturesDefaultFromModel();
     void copyOthersDefaultFromModel();
 
+    void update_Na();
+    void update_Nd();
+
 private slots:
+    void on_donorCheckBox_stateChanged(int );
+    void on_acceptorCheckBox_stateChanged(int );
     void on_NdSlider_valueChanged(int value);
     void on_NaSlider_valueChanged(int value);
     void on_surfacePotentialSpinner_valueChanged(double );

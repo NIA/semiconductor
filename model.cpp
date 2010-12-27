@@ -62,8 +62,9 @@ void Model::set_others_default()
 void Model::fill_data()
 {
     compute_neutral_fermi_level();
-    //solve_potential_equation(300, 3e-6, 1e-9);
-    do_shooting(3e-6, 5e-9);
+    //solve_potential_equation(surface_field, xmax, xmax/1e3);
+    //do_shooting(3e-6, 5e-9);
+    compute_fermi_distribution(Eg/500);
 }
 
 void Model::get_bending_data_eV(/*out*/ DataSeries & eV_data) const
@@ -73,6 +74,16 @@ void Model::get_bending_data_eV(/*out*/ DataSeries & eV_data) const
     for(int i = 0; i < bending_data.size(); ++i)
     {
         eV_data.push_back(bending_data.xs[i], erg_to_electron_volt(bending_data.ys[i]));
+    }
+}
+
+void Model::get_fermi_data_eV(/*out*/ DataSeries & eV_data) const
+{
+    eV_data.clear();
+
+    for(int i = 0; i < fermi_data.size(); ++i)
+    {
+        eV_data.push_back(fermi_data.xs[i], erg_to_electron_volt(fermi_data.ys[i]));
     }
 }
 
@@ -211,4 +222,14 @@ void Model::do_shooting(double xmax /*cm*/, double xstep/*cm*/)
 double Model::get_xmax() // cm
 {
     return xmax;
+}
+
+void Model::compute_fermi_distribution(double Estep /*erg*/)
+{
+    fermi_data.clear();
+
+    for(double E = 0; E < Eg; E+= Estep)
+    {
+        fermi_data.push_back(fermi(E, neutral_fermi_level), E);
+    }
 }

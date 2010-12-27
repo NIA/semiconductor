@@ -32,6 +32,7 @@ class Model
 {
 private:
     DataSeries bending_data; // erg(cm)
+    DataSeries fermi_data; // erg(1)
 
     // Parameters
 
@@ -74,6 +75,7 @@ private:
 
     void do_shooting(double xmax /*cm*/, double xstep/*cm*/);
     void solve_potential_equation(double surface_electric_field /*CGS*/, double xmax /*cm*/, double xstep /*cm*/);
+    void compute_fermi_distribution(double Estep /*erg*/);
 
 public:
     Model();
@@ -85,6 +87,8 @@ public:
     void fill_data();
     const DataSeries & get_bending_data_erg() const { return bending_data; }
     void get_bending_data_eV(/*out*/ DataSeries & eV_data) const;
+    const DataSeries & get_fermi_data_erg() const { return fermi_data; }
+    void get_fermi_data_eV(/*out*/ DataSeries & eV_data) const;
 
     double get_fermi_level_erg() { return neutral_fermi_level; }
     double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }

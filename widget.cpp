@@ -5,6 +5,7 @@
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QSlider>
+#include <QCheckBox>
 
 namespace
 {
@@ -51,7 +52,9 @@ Widget::Widget(Model * model, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget),
     model(model),
-    initializing(true)
+    initializing(true),
+    acceptorEnabled(false),
+    donorEnabled(true)
 {
     ui->setupUi(this);
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
@@ -68,6 +71,9 @@ Widget::Widget(Model * model, QWidget *parent) :
     copySiliconFromModel();
     copyAdmixturesDefaultFromModel();
     copyOthersDefaultFromModel();
+
+    findChild<QCheckBox*>("acceptorCheckBox")->setChecked(acceptorEnabled);
+    findChild<QCheckBox*>("donorCheckBox")->setChecked(donorEnabled);
 
     initializing = false;
 
@@ -102,11 +108,11 @@ void Widget::refreshPlot()
         return;
 
     model->fill_data();
-    model->get_bending_data_eV(plot_data);
+    model->get_fermi_data_eV(plot_data);
     bendingCurve->setSamples(plot_data.xs, plot_data.ys);
 
     double xmin = 0;
-    double xmax = model->get_xmax();
+    double xmax = 1;
     double Ev = 0;
     double Ec = Ev + model->get_Eg_eV();
     set_level(EvCurve, Ev, xmin, xmax);
@@ -212,20 +218,70 @@ void Widget::on_surfacePotentialSpinner_valueChanged(double value)
     refreshPlot();
 }
 
-void Widget::on_NaSlider_valueChanged(int)
+void Widget::update_Na()
 {
-    double Na_value = density_slider_value(reinterpret_cast<QSlider*>(sender()));
+    double Na_value = density_slider_value(findChild<QSlider*>("NaSlider"));
     findChild<QLineEdit*>("NaLineEdit")->setText(format_density(Na_value));
 
     model->set_density_acceptor(Na_value);
+}
+
+void Widget::update_Nd()
+{
+    double Nd_value = density_slider_value(findChild<QSlider*>("NdSlider"));
+    findChild<QLineEdit*>("NdLineEdit")->setText(format_density(Nd_value));
+
+    model->set_density_donor(Nd_value);
+}
+
+void Widget::on_NaSlider_valueChanged(int)
+{
+    update_Na();
     refreshPlot();
 }
 
 void Widget::on_NdSlider_valueChanged(int)
 {
-    double Nd_value = density_slider_value(reinterpret_cast<QSlider*>(sender()));
-    findChild<QLineEdit*>("NdLineEdit")->setText(format_density(Nd_value));
+    update_Nd();
+    refreshPlot();
+}
 
-    model->set_density_donor(Nd_value);
+void Widget::on_acceptorCheckBox_stateChanged(int check_state)
+{
+    acceptorEnabled = (check_state == Qt::Checked);
+    if(acceptorEnabled)
+    {
+        update_Na();
+        EaCurve->attach(findChild<QwtPlot*>("plotArea"));
+    }
+    else
+    {
+        model->set_density_acceptor(0);
+        EaCurve->detach();
+    }
+
+    findChild<QDoubleSpinBox*>("EaSpinner")->setEnabled(acceptorEnabled);
+    findChild<QSlider*>("NaSlider")->setEnabled(acceptorEnabled);
+    findChild<QLineEdit*>("NaLineEdit")->setEnabled(acceptorEnabled);
+    refreshPlot();
+}
+
+void Widget::on_donorCheckBox_stateChanged(int check_state)
+{
+    donorEnabled = (check_state == Qt::Checked);
+    if(donorEnabled)
+    {
+        update_Nd();
+        EdCurve->attach(findChild<QwtPlot*>("plotArea"));
+    }
+    else
+    {
+        model->set_density_donor(0);
+        EdCurve->detach();
+    }
+
+    findChild<QDoubleSpinBox*>("EdSpinner")->setEnabled(donorEnabled);
+    findChild<QSlider*>("NdSlider")->setEnabled(donorEnabled);
+    findChild<QLineEdit*>("NdLineEdit")->setEnabled(donorEnabled);
     refreshPlot();
 }
