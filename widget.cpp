@@ -7,6 +7,7 @@
 #include <QSlider>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QFileDialog>
 
 namespace
 {
@@ -403,5 +404,51 @@ void Widget::reattach_level_curves()
     else
     {
         fermiLevelCurve->detach();
+    }
+}
+
+void Widget::on_pushButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Plot to File"),
+                                                    "data.csv",
+                                                    tr("Comma Separated Values (*.csv)"));
+    DataSeries tempData;
+    const DataSeries * saveData = &tempData;
+
+    switch(plotVariant)
+    {
+    case PV_FERMI_DISTRIBUTION:
+        model->get_fermi_data_eV(tempData);
+        break;
+
+    case PV_FERMI_LEVEL:
+        model->get_fermi_level_data_eV(tempData);
+        break;
+
+    case PV_NA:
+        saveData = &model->get_Na_data();
+        break;
+
+    case PV_ND:
+        saveData = &model->get_Nd_data();
+        break;
+
+    case PV_LOG_NA:
+        saveData = &model->get_Na_log_data();
+        break;
+
+    case PV_LOG_ND:
+        saveData = &model->get_Nd_log_data();
+        break;
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    QTextStream outStream(&file);
+    for(int i = 0; i < saveData->size(); ++i)
+    {
+        outStream << saveData->xs[i] << ", " << saveData->ys[i] << '\n';
     }
 }
