@@ -37,6 +37,10 @@ private:
     DataSeries Nd_data; // Na(1/kT)
     DataSeries Na_log_data; // log Na(1/kT)
     DataSeries Nd_log_data; // log Na(1/kT)
+    DataSeries n_data; // n(1/kT)
+    DataSeries p_data; // p(1/kT)
+    DataSeries n_log_data; // log n(1/kT)
+    DataSeries p_log_data; // log p(1/kT)
 
     // Parameters
 
@@ -98,6 +102,10 @@ public:
     const DataSeries & get_Nd_data() const { return Nd_data; }
     const DataSeries & get_Na_log_data() const { return Na_log_data; }
     const DataSeries & get_Nd_log_data() const { return Nd_log_data; }
+    const DataSeries & get_n_data() const { return n_data; }
+    const DataSeries & get_p_data() const { return p_data; }
+    const DataSeries & get_n_log_data() const { return n_log_data; }
+    const DataSeries & get_p_log_data() const { return p_log_data; }
 
     double get_fermi_level_erg() { return neutral_fermi_level; }
     double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }

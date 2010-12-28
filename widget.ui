@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>874</width>
-    <height>488</height>
+    <width>919</width>
+    <height>467</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,13 @@
         <widget class="QComboBox" name="plotVariantsComboBox">
          <property name="currentIndex">
           <number>-1</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="logScaleCheckBox">
+         <property name="text">
+          <string>Logarithmic scale</string>
          </property>
         </widget>
        </item>

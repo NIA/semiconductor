@@ -34,6 +34,8 @@ private:
 
     int plotVariant;
 
+    bool logScale;
+
     void reattach_level_curves();
     void refreshPlot();
 
@@ -45,6 +47,7 @@ private:
     void update_Nd();
 
 private slots:
+    void on_logScaleCheckBox_stateChanged(int );
     void on_pushButton_clicked();
     void on_plotVariantsComboBox_currentIndexChanged(int index);
     void on_TstepSpinner_valueChanged(double );

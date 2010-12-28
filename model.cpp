@@ -190,6 +190,10 @@ void Model::compute_dependences()
     Na_data.clear();
     Nd_log_data.clear();
     Na_log_data.clear();
+    n_data.clear();
+    p_data.clear();
+    n_log_data.clear();
+    p_log_data.clear();
 
     double fermi_level;
     double kT_inv;
@@ -203,6 +207,10 @@ void Model::compute_dependences()
         Na_data.push_back(kT_inv, density_acceptor_n(fermi_level, T));
         Nd_log_data.push_back(kT_inv, log10(density_donor_p(fermi_level,T)));
         Na_log_data.push_back(kT_inv, log10(density_acceptor_n(fermi_level, T)));
+        n_data.push_back(kT_inv, density_n(fermi_level, T));
+        p_data.push_back(kT_inv, density_p(fermi_level, T));
+        n_log_data.push_back(kT_inv, log10(density_n(fermi_level, T)));
+        p_log_data.push_back(kT_inv, log10(density_p(fermi_level, T)));
     }
 }
 

@@ -55,8 +55,8 @@ namespace
         PV_FERMI_LEVEL,
         PV_NA,
         PV_ND,
-        PV_LOG_NA,
-        PV_LOG_ND,
+        PV_N,
+        PV_P,
         _PV_COUNT
     };
 
@@ -66,8 +66,8 @@ namespace
         "Fermi level(1/kT)",
         "Charged acceptors(1/kT)",
         "Charged donors(1/kT)",
-        "log Charged acceptors(1/kT)",
-        "log Charged donors(1/kT)"
+        "Free electrons(1/kT)",
+        "Free holes(1/kT)"
     };
 }
 
@@ -78,7 +78,8 @@ Widget::Widget(Model * model, QWidget *parent) :
     initializing(true),
     acceptorEnabled(false),
     donorEnabled(true),
-    plotVariant(PV_FERMI_DISTRIBUTION)
+    plotVariant(PV_FERMI_DISTRIBUTION),
+    logScale(false)
 {
     ui->setupUi(this);
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
@@ -157,19 +158,31 @@ void Widget::refreshPlot()
         break;
 
     case PV_NA:
-        mainCurve->setSamples(model->get_Na_data().xs, model->get_Na_data().ys);
+        if(logScale)
+            mainCurve->setSamples(model->get_Na_log_data().xs, model->get_Na_log_data().ys);
+        else
+            mainCurve->setSamples(model->get_Na_data().xs, model->get_Na_data().ys);
         break;
 
     case PV_ND:
-        mainCurve->setSamples(model->get_Nd_data().xs, model->get_Nd_data().ys);
+        if(logScale)
+            mainCurve->setSamples(model->get_Nd_log_data().xs, model->get_Nd_log_data().ys);
+        else
+            mainCurve->setSamples(model->get_Nd_data().xs, model->get_Nd_data().ys);
         break;
 
-    case PV_LOG_NA:
-        mainCurve->setSamples(model->get_Na_log_data().xs, model->get_Na_log_data().ys);
+    case PV_N:
+        if(logScale)
+            mainCurve->setSamples(model->get_n_log_data().xs, model->get_n_log_data().ys);
+        else
+            mainCurve->setSamples(model->get_n_data().xs, model->get_n_data().ys);
         break;
 
-    case PV_LOG_ND:
-        mainCurve->setSamples(model->get_Nd_log_data().xs, model->get_Nd_log_data().ys);
+    case PV_P:
+        if(logScale)
+            mainCurve->setSamples(model->get_p_log_data().xs, model->get_p_log_data().ys);
+        else
+            mainCurve->setSamples(model->get_p_data().xs, model->get_p_data().ys);
         break;
     }
 
@@ -426,19 +439,31 @@ void Widget::on_pushButton_clicked()
         break;
 
     case PV_NA:
-        saveData = &model->get_Na_data();
+        if(logScale)
+            saveData = &model->get_Na_log_data();
+        else
+            saveData = &model->get_Na_data();
         break;
 
     case PV_ND:
-        saveData = &model->get_Nd_data();
+        if(logScale)
+            saveData = &model->get_Nd_log_data();
+        else
+            saveData = &model->get_Nd_data();
         break;
 
-    case PV_LOG_NA:
-        saveData = &model->get_Na_log_data();
+    case PV_N:
+        if(logScale)
+            saveData = &model->get_n_log_data();
+        else
+            saveData = &model->get_n_data();
         break;
 
-    case PV_LOG_ND:
-        saveData = &model->get_Nd_log_data();
+    case PV_P:
+        if(logScale)
+            saveData = &model->get_p_log_data();
+        else
+            saveData = &model->get_p_data();
         break;
     }
 
@@ -451,4 +476,10 @@ void Widget::on_pushButton_clicked()
     {
         outStream << saveData->xs[i] << ", " << saveData->ys[i] << '\n';
     }
+}
+
+void Widget::on_logScaleCheckBox_stateChanged(int state)
+{
+    logScale = (state == Qt::Checked);
+    refreshPlot();
 }
