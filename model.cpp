@@ -188,6 +188,8 @@ void Model::compute_dependences()
     fermi_level_data.clear();
     Nd_data.clear();
     Na_data.clear();
+    Nd_log_data.clear();
+    Na_log_data.clear();
 
     double fermi_level;
     double kT_inv;
@@ -197,8 +199,10 @@ void Model::compute_dependences()
         kT_inv = 1/erg_to_electron_volt(k*T);
 
         fermi_level_data.push_back(kT_inv, fermi_level);
-        Nd_data.push_back(kT_inv, log10(density_donor_p(fermi_level,T)));
-        Na_data.push_back(kT_inv, log10(density_acceptor_n(fermi_level, T)));
+        Nd_data.push_back(kT_inv, density_donor_p(fermi_level,T));
+        Na_data.push_back(kT_inv, density_acceptor_n(fermi_level, T));
+        Nd_log_data.push_back(kT_inv, log10(density_donor_p(fermi_level,T)));
+        Na_log_data.push_back(kT_inv, log10(density_acceptor_n(fermi_level, T)));
     }
 }
 

@@ -54,6 +54,8 @@ namespace
         PV_FERMI_LEVEL,
         PV_NA,
         PV_ND,
+        PV_LOG_NA,
+        PV_LOG_ND,
         _PV_COUNT
     };
 
@@ -61,6 +63,8 @@ namespace
     {
         "Fermi distribution(Energy)",
         "Fermi level(1/kT)",
+        "Charged acceptors(1/kT)",
+        "Charged donors(1/kT)",
         "log Charged acceptors(1/kT)",
         "log Charged donors(1/kT)"
     };
@@ -157,6 +161,14 @@ void Widget::refreshPlot()
 
     case PV_ND:
         mainCurve->setSamples(model->get_Nd_data().xs, model->get_Nd_data().ys);
+        break;
+
+    case PV_LOG_NA:
+        mainCurve->setSamples(model->get_Na_log_data().xs, model->get_Na_log_data().ys);
+        break;
+
+    case PV_LOG_ND:
+        mainCurve->setSamples(model->get_Nd_log_data().xs, model->get_Nd_log_data().ys);
         break;
     }
 

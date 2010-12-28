@@ -33,8 +33,10 @@ class Model
 private:
     DataSeries fermi_data; // erg(1)
     DataSeries fermi_level_data; // erg(1/kT)
-    DataSeries Na_data; // log Na(1/kT)
-    DataSeries Nd_data; // log Na(1/kT)
+    DataSeries Na_data; // Na(1/kT)
+    DataSeries Nd_data; // Na(1/kT)
+    DataSeries Na_log_data; // log Na(1/kT)
+    DataSeries Nd_log_data; // log Na(1/kT)
 
     // Parameters
 
@@ -94,6 +96,8 @@ public:
     void get_fermi_level_data_eV(/*out*/ DataSeries & eV_data) const;
     const DataSeries & get_Na_data() const { return Na_data; }
     const DataSeries & get_Nd_data() const { return Nd_data; }
+    const DataSeries & get_Na_log_data() const { return Na_log_data; }
+    const DataSeries & get_Nd_log_data() const { return Nd_log_data; }
 
     double get_fermi_level_erg() { return neutral_fermi_level; }
     double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }
