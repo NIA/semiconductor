@@ -26,21 +26,27 @@ struct DataSeries
     }
 };
 
+// Define transformation of axis as function double -> double
+typedef double (*Transformation)(double value);
+
+// Default transformations:
+// - erg_to_electron_volt
+// - std::log10
+// - and the following:
+double transform_T_to_inverted_kT(double T);
+double no_transform(double value);
+
 const double electron_mass = 9.1093e-28; // mass of electron, gramm
 
 class Model
 {
 private:
     DataSeries fermi_data; // erg(1)
-    DataSeries fermi_level_data; // erg(1/kT)
-    DataSeries Na_data; // Na(1/kT)
-    DataSeries Nd_data; // Na(1/kT)
-    DataSeries Na_log_data; // log Na(1/kT)
-    DataSeries Nd_log_data; // log Na(1/kT)
-    DataSeries n_data; // n(1/kT)
-    DataSeries p_data; // p(1/kT)
-    DataSeries n_log_data; // log n(1/kT)
-    DataSeries p_log_data; // log p(1/kT)
+    DataSeries fermi_level_data; // erg(T)
+    DataSeries Na_data; // Na(T)
+    DataSeries Nd_data; // Na(T)
+    DataSeries n_data; // n(T)
+    DataSeries p_data; // p(T)
 
     // Parameters
 
@@ -86,6 +92,8 @@ private:
     void compute_fermi_distribution(double Estep /*erg*/);
     void compute_dependences();
 
+    void copy_and_transform_data(const DataSeries src_data, /*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const;
+
 public:
     Model();
 
@@ -94,18 +102,13 @@ public:
     void set_others_default();
 
     void fill_data();
-    const DataSeries & get_fermi_data_erg() const { return fermi_data; }
-    void get_fermi_data_eV(/*out*/ DataSeries & eV_data) const;
 
-    void get_fermi_level_data_eV(/*out*/ DataSeries & eV_data) const;
-    const DataSeries & get_Na_data() const { return Na_data; }
-    const DataSeries & get_Nd_data() const { return Nd_data; }
-    const DataSeries & get_Na_log_data() const { return Na_log_data; }
-    const DataSeries & get_Nd_log_data() const { return Nd_log_data; }
-    const DataSeries & get_n_data() const { return n_data; }
-    const DataSeries & get_p_data() const { return p_data; }
-    const DataSeries & get_n_log_data() const { return n_log_data; }
-    const DataSeries & get_p_log_data() const { return p_log_data; }
+    void get_fermi_data(/*out*/ DataSeries & out_data, Transformation x_transform = no_transform, Transformation y_transform = no_transform) const;
+    void get_fermi_level_data(/*out*/ DataSeries & out_data, Transformation x_transform = no_transform, Transformation y_transform = no_transform) const;
+    void get_Na_data(/*out*/ DataSeries & out_data, Transformation x_transform = no_transform, Transformation y_transform = no_transform) const;
+    void get_Nd_data(/*out*/ DataSeries & out_data, Transformation x_transform = no_transform, Transformation y_transform = no_transform) const;
+    void get_n_data(/*out*/ DataSeries & out_data, Transformation x_transform = no_transform, Transformation y_transform = no_transform) const;
+    void get_p_data(/*out*/ DataSeries & out_data, Transformation x_transform = no_transform, Transformation y_transform = no_transform) const;
 
     double get_fermi_level_erg() { return neutral_fermi_level; }
     double get_fermi_level_eV() { return erg_to_electron_volt(neutral_fermi_level); }

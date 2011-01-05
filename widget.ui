@@ -33,13 +33,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="logScaleCheckBox">
-         <property name="text">
-          <string>Logarithmic scale</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
           <string>Save to file</string>
@@ -97,6 +90,44 @@
         </sizepolicy>
        </property>
       </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Axis properties:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="logScaleCheckBox">
+         <property name="text">
+          <string>Logarithmic vertical axis</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="invertedScaleCheckBox">
+         <property name="text">
+          <string>Inverted horisontal axis</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

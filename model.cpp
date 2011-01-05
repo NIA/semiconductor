@@ -7,8 +7,6 @@ namespace
     // Fundametnal
     const double default_eff_density = 2.51e+19; // cm^-3
     const double elementary_charge = 4.80320427e-10; // CGS
-    const double electron_charge = -elementary_charge; // CGS
-    const double MAX_DOUBLE = std::numeric_limits<double>::max();
 
     // Silicon:
     const double silicon_Eg = electron_volt_to_erg(1.12); // erg
@@ -24,7 +22,6 @@ namespace
     const double default_density_donor = 1e17; // cm^-3
     const double default_density_acceptor = 5e16; // cm^-3
     const double default_E_admixture = electron_volt_to_erg(0.045); // erg
-    const double default_surface_potential = volt_to_cgs(0.1); // CGS
 
     // Computation:
     const double electric_field_min = -1e4;
@@ -71,24 +68,38 @@ void Model::fill_data()
     compute_dependences();
 }
 
-void Model::get_fermi_data_eV(/*out*/ DataSeries & eV_data) const
+void Model::copy_and_transform_data(const DataSeries src_data, /*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
 {
-    eV_data.clear();
+    out_data.clear();
 
     for(int i = 0; i < fermi_data.size(); ++i)
     {
-        eV_data.push_back(fermi_data.xs[i], erg_to_electron_volt(fermi_data.ys[i]));
+        out_data.push_back(x_transform(src_data.xs[i]), y_transform(src_data.ys[i]));
     }
 }
-
-void Model::get_fermi_level_data_eV(/*out*/ DataSeries & eV_data) const
+void Model::get_fermi_data(/*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
 {
-    eV_data.clear();
-
-    for(int i = 0; i < fermi_level_data.size(); ++i)
-    {
-        eV_data.push_back(fermi_level_data.xs[i], erg_to_electron_volt(fermi_level_data.ys[i]));
-    }
+    copy_and_transform_data(fermi_data, out_data, x_transform, y_transform);
+}
+void Model::get_fermi_level_data(/*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
+{
+    copy_and_transform_data(fermi_level_data, out_data, x_transform, y_transform);
+}
+void Model::get_Na_data(/*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
+{
+    copy_and_transform_data(Na_data, out_data, x_transform, y_transform);
+}
+void Model::get_Nd_data(/*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
+{
+    copy_and_transform_data(Nd_data, out_data, x_transform, y_transform);
+}
+void Model::get_n_data(/*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
+{
+    copy_and_transform_data(n_data, out_data, x_transform, y_transform);
+}
+void Model::get_p_data(/*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
+{
+    copy_and_transform_data(p_data, out_data, x_transform, y_transform);
 }
 
 double eff_density(double m, double T)
@@ -188,29 +199,28 @@ void Model::compute_dependences()
     fermi_level_data.clear();
     Nd_data.clear();
     Na_data.clear();
-    Nd_log_data.clear();
-    Na_log_data.clear();
     n_data.clear();
     p_data.clear();
-    n_log_data.clear();
-    p_log_data.clear();
 
     double fermi_level;
-    double kT_inv;
     for(double T = Tmin; T <= Tmax; T += Tstep)
     {
         fermi_level = compute_neutral_fermi_level(T);
-        kT_inv = 1/erg_to_electron_volt(k*T);
 
-        fermi_level_data.push_back(kT_inv, fermi_level);
-        Nd_data.push_back(kT_inv, density_donor_p(fermi_level,T));
-        Na_data.push_back(kT_inv, density_acceptor_n(fermi_level, T));
-        Nd_log_data.push_back(kT_inv, log10(density_donor_p(fermi_level,T)));
-        Na_log_data.push_back(kT_inv, log10(density_acceptor_n(fermi_level, T)));
-        n_data.push_back(kT_inv, density_n(fermi_level, T));
-        p_data.push_back(kT_inv, density_p(fermi_level, T));
-        n_log_data.push_back(kT_inv, log10(density_n(fermi_level, T)));
-        p_log_data.push_back(kT_inv, log10(density_p(fermi_level, T)));
+        fermi_level_data.push_back(T, fermi_level);
+        Nd_data.push_back(T, density_donor_p(fermi_level,T));
+        Na_data.push_back(T, density_acceptor_n(fermi_level, T));
+        n_data.push_back(T, density_n(fermi_level, T));
+        p_data.push_back(T, density_p(fermi_level, T));
     }
 }
 
+double transform_T_to_inverted_kT(double T)
+{
+    return 1/erg_to_electron_volt(k*T);
+}
+
+double no_transform(double value)
+{
+    return value;
+}

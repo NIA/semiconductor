@@ -62,12 +62,12 @@ namespace
 
     const QString plot_captions[_PV_COUNT] =
     {
-        "Fermi distribution(Energy)",
-        "Fermi level(1/kT)",
-        "Charged acceptors(1/kT)",
-        "Charged donors(1/kT)",
-        "Free electrons(1/kT)",
-        "Free holes(1/kT)"
+        QObject::tr("Fermi distribution"),
+        QObject::tr("Fermi level"),
+        QObject::tr("Charged acceptors"),
+        QObject::tr("Charged donors"),
+        QObject::tr("Free electrons"),
+        QObject::tr("Free holes")
     };
 }
 
@@ -79,13 +79,14 @@ Widget::Widget(Model * model, QWidget *parent) :
     acceptorEnabled(false),
     donorEnabled(true),
     plotVariant(PV_FERMI_DISTRIBUTION),
-    logScale(false)
+    logYScale(false),
+    invertedXScale(true)
 {
     ui->setupUi(this);
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
     plotArea->setCanvasBackground(QColor(255,255,255));
 
-    configure_curve(&mainCurve, plotArea, "Bending", QColor(50, 50, 200));
+    configure_curve(&mainCurve, plotArea, "", QColor(50, 50, 200));
     mainCurve->setRenderHint(QwtPlotCurve::RenderAntialiased);
     configure_curve(&EvCurve, plotArea, "Ev", Qt::black);
     configure_curve(&EcCurve, plotArea, "Ec", Qt::black);
@@ -99,6 +100,9 @@ Widget::Widget(Model * model, QWidget *parent) :
 
     findChild<QCheckBox*>("acceptorCheckBox")->setChecked(acceptorEnabled);
     findChild<QCheckBox*>("donorCheckBox")->setChecked(donorEnabled);
+
+    findChild<QCheckBox*>("logScaleCheckBox")->setChecked(logYScale);
+    findChild<QCheckBox*>("invertedScaleCheckBox")->setChecked(invertedXScale);
 
     QComboBox * plotVariantsComboBox = findChild<QComboBox*>("plotVariantsComboBox");
     for(int i = 0; i < _PV_COUNT; ++i)
@@ -141,50 +145,11 @@ void Widget::refreshPlot()
 
     model->fill_data();  
     findChild<QLineEdit*>("fermiLevelLineEdit")->setText(QString::number(model->get_fermi_level_eV(), 'f', 6));
+    update_plot_data();
+    mainCurve->setSamples(plotData.xs, plotData.ys);
 
     double Ev = 0;
     double Ec = Ev + model->get_Eg_eV();
-
-    switch(plotVariant)
-    {
-    case PV_FERMI_DISTRIBUTION:
-        model->get_fermi_data_eV(plot_data);
-        mainCurve->setSamples(plot_data.xs, plot_data.ys);
-        break;
-
-    case PV_FERMI_LEVEL:
-        model->get_fermi_level_data_eV(plot_data);
-        mainCurve->setSamples(plot_data.xs, plot_data.ys);
-        break;
-
-    case PV_NA:
-        if(logScale)
-            mainCurve->setSamples(model->get_Na_log_data().xs, model->get_Na_log_data().ys);
-        else
-            mainCurve->setSamples(model->get_Na_data().xs, model->get_Na_data().ys);
-        break;
-
-    case PV_ND:
-        if(logScale)
-            mainCurve->setSamples(model->get_Nd_log_data().xs, model->get_Nd_log_data().ys);
-        else
-            mainCurve->setSamples(model->get_Nd_data().xs, model->get_Nd_data().ys);
-        break;
-
-    case PV_N:
-        if(logScale)
-            mainCurve->setSamples(model->get_n_log_data().xs, model->get_n_log_data().ys);
-        else
-            mainCurve->setSamples(model->get_n_data().xs, model->get_n_data().ys);
-        break;
-
-    case PV_P:
-        if(logScale)
-            mainCurve->setSamples(model->get_p_log_data().xs, model->get_p_log_data().ys);
-        else
-            mainCurve->setSamples(model->get_p_data().xs, model->get_p_data().ys);
-        break;
-    }
 
     double xmin = mainCurve->minXValue();
     double xmax = mainCurve->maxXValue();
@@ -195,6 +160,8 @@ void Widget::refreshPlot()
     set_level(fermiLevelCurve, Ev + model->get_fermi_level_eV(), xmin, xmax);
 
     QwtPlot* plotArea = findChild<QwtPlot*>("plotArea");
+    plotArea->setAxisTitle(QwtPlot::xBottom, xAxisTitle);
+    plotArea->setAxisTitle(QwtPlot::yLeft, yAxisTitle);
     plotArea->replot();
 }
 
@@ -425,61 +392,69 @@ void Widget::on_pushButton_clicked()
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Plot to File"),
                                                     "data.csv",
                                                     tr("Comma Separated Values (*.csv)"));
-    DataSeries tempData;
-    const DataSeries * saveData = &tempData;
-
-    switch(plotVariant)
-    {
-    case PV_FERMI_DISTRIBUTION:
-        model->get_fermi_data_eV(tempData);
-        break;
-
-    case PV_FERMI_LEVEL:
-        model->get_fermi_level_data_eV(tempData);
-        break;
-
-    case PV_NA:
-        if(logScale)
-            saveData = &model->get_Na_log_data();
-        else
-            saveData = &model->get_Na_data();
-        break;
-
-    case PV_ND:
-        if(logScale)
-            saveData = &model->get_Nd_log_data();
-        else
-            saveData = &model->get_Nd_data();
-        break;
-
-    case PV_N:
-        if(logScale)
-            saveData = &model->get_n_log_data();
-        else
-            saveData = &model->get_n_data();
-        break;
-
-    case PV_P:
-        if(logScale)
-            saveData = &model->get_p_log_data();
-        else
-            saveData = &model->get_p_data();
-        break;
-    }
-
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return;
 
     QTextStream outStream(&file);
-    for(int i = 0; i < saveData->size(); ++i)
+    for(int i = 0; i < plotData.size(); ++i)
     {
-        outStream << saveData->xs[i] << ", " << saveData->ys[i] << '\n';
+        outStream << plotData.xs[i] << ", " << plotData.ys[i] << '\n';
     }
 }
 
 void Widget::on_logScaleCheckBox_stateChanged(int state)
 {
-    logScale = (state == Qt::Checked);
+    logYScale = (state == Qt::Checked);
     refreshPlot();
+}
+
+void Widget::on_invertedScaleCheckBox_stateChanged(int state)
+{
+    invertedXScale = (state == Qt::Checked);
+    refreshPlot();
+}
+
+void Widget::update_plot_data()
+{
+    Transformation x_transform = invertedXScale ? transform_T_to_inverted_kT : no_transform;
+    Transformation y_transform = logYScale ? log10 : no_transform;
+
+    xAxisTitle = tr(invertedXScale ? "1/kT, eV<sup>-1</sup>" : "Temperature, K");
+
+    switch(plotVariant)
+    {
+    case PV_FERMI_DISTRIBUTION:
+        // NOTE: x_transform and y_transform are ignored for this plot
+        model->get_fermi_data(plotData, no_transform, erg_to_electron_volt);
+        xAxisTitle = tr("Fermi distribution, probability");
+        yAxisTitle = tr("Energy, eV");
+        break;
+
+    case PV_FERMI_LEVEL:
+        // NOTE: y_transform is ignored for this plot
+        model->get_fermi_level_data(plotData, x_transform, erg_to_electron_volt);
+        yAxisTitle = tr("Energy, eV");
+        break;
+
+    case PV_NA:
+        model->get_Na_data(plotData, x_transform, y_transform);
+        yAxisTitle = tr(logYScale ? "log(Na), cm<sup>-3</sup>" : "Na, cm<sup>-3</sup>");
+        break;
+
+    case PV_ND:
+        model->get_Nd_data(plotData, x_transform, y_transform);
+        yAxisTitle = tr(logYScale ? "log(Nd), cm<sup>-3</sup>" : "Nd, cm<sup>-3</sup>");
+        break;
+
+    case PV_N:
+        model->get_n_data(plotData, x_transform, y_transform);
+        yAxisTitle = tr(logYScale ? "log(n), cm<sup>-3</sup>" : "n, cm<sup>-3</sup>");
+        break;
+
+    case PV_P:
+        model->get_p_data(plotData, x_transform, y_transform);
+        yAxisTitle = tr(logYScale ? "log(p), cm<sup>-3</sup>" : "p, cm<sup>-3</sup>");
+        break;
+    }
 }
