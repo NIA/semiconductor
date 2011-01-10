@@ -439,12 +439,12 @@ void Widget::update_plot_data()
 
     case PV_NA:
         model->get_Na_data(plotData, x_transform, y_transform);
-        yAxisTitle = tr(logYScale ? "log(Na), cm<sup>-3</sup>" : "Na, cm<sup>-3</sup>");
+        yAxisTitle = tr(logYScale ? "log(N<sub>a</sub>), cm<sup>-3</sup>" : "N<sub>a</sub>, cm<sup>-3</sup>");
         break;
 
     case PV_ND:
         model->get_Nd_data(plotData, x_transform, y_transform);
-        yAxisTitle = tr(logYScale ? "log(Nd), cm<sup>-3</sup>" : "Nd, cm<sup>-3</sup>");
+        yAxisTitle = tr(logYScale ? "log(N<sub>d</sub>), cm<sup>-3</sup>" : "N<sub>d</sub>, cm<sup>-3</sup>");
         break;
 
     case PV_N:
