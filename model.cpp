@@ -68,11 +68,11 @@ void Model::fill_data()
     compute_dependences();
 }
 
-void Model::copy_and_transform_data(const DataSeries src_data, /*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const
+void Model::copy_and_transform_data(const DataSeries src_data, /*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform)
 {
     out_data.clear();
 
-    for(int i = 0; i < fermi_data.size(); ++i)
+    for(int i = 0; i < src_data.size(); ++i)
     {
         out_data.push_back(x_transform(src_data.xs[i]), y_transform(src_data.ys[i]));
     }

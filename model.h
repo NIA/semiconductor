@@ -92,7 +92,7 @@ private:
     void compute_fermi_distribution(double Estep /*erg*/);
     void compute_dependences();
 
-    void copy_and_transform_data(const DataSeries src_data, /*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform) const;
+    static void copy_and_transform_data(const DataSeries src_data, /*out*/ DataSeries & out_data, Transformation x_transform, Transformation y_transform);
 
 public:
     Model();
