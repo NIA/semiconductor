@@ -1,10 +1,10 @@
 # -------------------------------------------------
 # Project created by QtCreator 2010-12-13T21:09:32
 # -------------------------------------------------
-TARGET = bending
+TARGET = semiconductor
 TEMPLATE = app
-unix:INCLUDEPATH += /usr/local/qwt-6.0.0-rc5/include/
-win32:INCLUDEPATH += C:\Qwt-6.0.0-rc5\include
+unix:INCLUDEPATH += /usr/local/qwt-6.0.1/include/
+win32:INCLUDEPATH += C:\\Qwt-6.0.1\\include
 OBJECTS_DIR = ./build
 DESTDIR = ./bin
 SOURCES += main.cpp \
@@ -15,4 +15,4 @@ HEADERS += widget.h \
     includes.h
 FORMS += widget.ui
 unix:release:LIBS += /usr/local/qwt-6.0.0-rc5/lib/libqwt.so.6
-win32:release:LIBS += qwt.dll
+win32:release:LIBS += C:\\Qwt-6.0.1\\lib\\qwt.dll
