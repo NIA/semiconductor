@@ -14,5 +14,10 @@ HEADERS += widget.h \
     model.h \
     includes.h
 FORMS += widget.ui
+win32 {
+    RC_FILE     += semiconductor.rc
+    OTHER_FILES += semiconductor.rc
+}
 unix:release:LIBS += /usr/local/qwt-6.0.0-rc5/lib/libqwt.so.6
 win32:release:LIBS += C:\\Qwt-6.0.1\\lib\\qwt.dll
+TRANSLATIONS += semiconductor_ru.ts
