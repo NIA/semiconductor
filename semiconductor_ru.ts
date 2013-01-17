@@ -6,7 +6,7 @@
     <message>
         <location filename="widget.ui" line="14"/>
         <source>Semiconductor with admixtures</source>
-        <translation>Полупроводник с примесями</translation>
+        <translation type="unfinished">Программа расчета концентрации носителей заряда в примесных полупроводниках</translation>
     </message>
     <message>
         <location filename="widget.ui" line="24"/>
