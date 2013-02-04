@@ -59,16 +59,6 @@ namespace
         PV_P,
         _PV_COUNT
     };
-
-    const QString plot_captions[_PV_COUNT] =
-    {
-        QObject::tr("Fermi distribution"),
-        QObject::tr("Fermi level"),
-        QObject::tr("Charged acceptors"),
-        QObject::tr("Charged donors"),
-        QObject::tr("Free electrons"),
-        QObject::tr("Free holes")
-    };
 }
 
 Widget::Widget(Model * model, QWidget *parent) :
@@ -105,6 +95,15 @@ Widget::Widget(Model * model, QWidget *parent) :
     findChild<QCheckBox*>("invertedScaleCheckBox")->setChecked(invertedXScale);
 
     QComboBox * plotVariantsComboBox = findChild<QComboBox*>("plotVariantsComboBox");
+    const QString plot_captions[_PV_COUNT] =
+    {
+        tr("Fermi distribution"),
+        tr("Fermi level"),
+        tr("Charged acceptors"),
+        tr("Charged donors"),
+        tr("Free electrons"),
+        tr("Free holes")
+    };
     for(int i = 0; i < _PV_COUNT; ++i)
     {
         plotVariantsComboBox->addItem(plot_captions[i], i);
@@ -420,7 +419,7 @@ void Widget::update_plot_data()
     Transformation x_transform = invertedXScale ? transform_T_to_inverted_kT : no_transform;
     Transformation y_transform = logYScale ? log10 : no_transform;
 
-    xAxisTitle = tr(invertedXScale ? "1/kT, eV<sup>-1</sup>" : "Temperature, K");
+    xAxisTitle = invertedXScale ? tr("1/kT, eV<sup>-1</sup>") : tr("Temperature, K");
 
     switch(plotVariant)
     {
@@ -439,22 +438,22 @@ void Widget::update_plot_data()
 
     case PV_NA:
         model->get_Na_data(plotData, x_transform, y_transform);
-        yAxisTitle = tr(logYScale ? "log(N<sub>a</sub>), cm<sup>-3</sup>" : "N<sub>a</sub>, cm<sup>-3</sup>");
+        yAxisTitle = logYScale ? tr("log(N<sub>a</sub>), cm<sup>-3</sup>") : tr("N<sub>a</sub>, cm<sup>-3</sup>");
         break;
 
     case PV_ND:
         model->get_Nd_data(plotData, x_transform, y_transform);
-        yAxisTitle = tr(logYScale ? "log(N<sub>d</sub>), cm<sup>-3</sup>" : "N<sub>d</sub>, cm<sup>-3</sup>");
+        yAxisTitle = logYScale ? tr("log(N<sub>d</sub>), cm<sup>-3</sup>") : tr("N<sub>d</sub>, cm<sup>-3</sup>");
         break;
 
     case PV_N:
         model->get_n_data(plotData, x_transform, y_transform);
-        yAxisTitle = tr(logYScale ? "log(n), cm<sup>-3</sup>" : "n, cm<sup>-3</sup>");
+        yAxisTitle = logYScale ? tr("log(n), cm<sup>-3</sup>") : tr("n, cm<sup>-3</sup>");
         break;
 
     case PV_P:
         model->get_p_data(plotData, x_transform, y_transform);
-        yAxisTitle = tr(logYScale ? "log(p), cm<sup>-3</sup>" : "p, cm<sup>-3</sup>");
+        yAxisTitle = logYScale ? tr("log(p), cm<sup>-3</sup>") : tr("p, cm<sup>-3</sup>");
         break;
     }
 }
