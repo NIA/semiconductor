@@ -17,7 +17,7 @@ namespace
     // Default:
     const double default_T = 300; // K
     const double default_Tmin = 50; // K
-    const double default_Tmax = 1500; // K
+    const double default_Tmax = 1000; // K
     const double default_Tstep = 1; // K
     const double default_density_donor = 1e17; // cm^-3
     const double default_density_acceptor = 5e16; // cm^-3
