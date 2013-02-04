@@ -1,24 +1,24 @@
 IDI_ICON1       ICON        DISCARDABLE "semiconductor.ico"
 
 1 VERSIONINFO
-  FILEVERSION    1,0,0,0
-  PRODUCTVERSION 1,0,0,0
+  FILEVERSION    1,0,1,0
+  PRODUCTVERSION 1,0,1,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904b0"
     BEGIN
-      VALUE "Comments", "Semiconductor 1.0 physics application\0"
+      VALUE "Comments", "Semiconductor 1.0.1 physics application\0"
       VALUE "CompanyName", "Kuban State University\0"
       VALUE "FileDescription", "Semiconductor\0"
-      VALUE "FileVersion", "1, 0, 0, 0\0"
+      VALUE "FileVersion", "1, 0, 1, 0\0"
       VALUE "InternalName", "Semiconductor\0"
       VALUE "LegalCopyright", "Copyright (c) 2013 Kuban State University, Faculty of Physics and Technology, Physics and Information Systems Chair\0"
       VALUE "LegalTrademarks", "\0"
       VALUE "OriginalFilename", "semiconductor.exe\0"
       VALUE "PrivateBuild", "\0"
       VALUE "ProductName", "Semiconductor - demonstrates physical characteristics of semiconductor with admixtures \0"
-      VALUE "ProductVersion", "1, 0, 0, 0\0"
+      VALUE "ProductVersion", "1, 0, 1, 0\0"
       VALUE "SpecialBuild", "\0"
     END
   END
