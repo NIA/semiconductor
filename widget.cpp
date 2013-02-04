@@ -427,7 +427,7 @@ void Widget::update_plot_data()
     case PV_FERMI_DISTRIBUTION:
         // NOTE: x_transform and y_transform are ignored for this plot
         model->get_fermi_data(plotData, no_transform, erg_to_electron_volt);
-        xAxisTitle = tr("Fermi distribution, probability");
+        xAxisTitle = tr("Fermi distribution function");
         yAxisTitle = tr("Energy, eV");
         break;
 
