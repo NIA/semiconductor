@@ -3,7 +3,7 @@
 # -------------------------------------------------
 TARGET = semiconductor
 TEMPLATE = app
-unix:INCLUDEPATH += /usr/local/qwt-6.0.1/include/
+unix:INCLUDEPATH += /usr/include/qwt/
 win32:INCLUDEPATH += C:\\Qwt-6.0.1\\include
 OBJECTS_DIR = ./build
 DESTDIR = ./bin
@@ -18,6 +18,6 @@ win32 {
     RC_FILE     += semiconductor.rc
     OTHER_FILES += semiconductor.rc
 }
-unix:release:LIBS += /usr/local/qwt-6.0.0-rc5/lib/libqwt.so.6
+unix:release:LIBS += /usr/lib/libqwt.so.6
 win32:release:LIBS += C:\\Qwt-6.0.1\\lib\\qwt.dll
 TRANSLATIONS += semiconductor_ru.ts
