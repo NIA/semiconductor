@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtCore/QTranslator>
 #include "widget.h"
 #include "model.h"

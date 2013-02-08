@@ -2,12 +2,7 @@
 #include "ui_widget.h"
 
 #include <qwt_plot.h>
-#include <QDoubleSpinBox>
-#include <QSpinBox>
-#include <QSlider>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QFileDialog>
+#include <QtWidgets/QtWidgets>
 
 namespace
 {

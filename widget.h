@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QWidget>
+#include <QtWidgets/QWidget>
 #include <qwt_plot_curve.h>
 #include "model.h"
 

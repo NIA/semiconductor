@@ -6,4 +6,5 @@ Makefile
 moc_*.cpp
 ui_*.h
 *.user
+*.user.*
 
